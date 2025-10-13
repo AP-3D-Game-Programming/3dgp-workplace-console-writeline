@@ -11,4 +11,4 @@ Sommige taken moeten jullie met 2 of meer boswachters oplossen.
 Jullie winnen als elke speler zijn taken heeft uitgevoerd en er niet meer dan 5 branden op het bord is, en de beer hebben weg gejaagd
 
 
-Jullie verliezen als er meer dan 5 branden op het zijn, of de beer niet verjaagd binnen 2 rondes
+Jullie verliezen als er meer dan 5 branden op het zijn, of de beer niet verjaagd is binnen 3 rondes
