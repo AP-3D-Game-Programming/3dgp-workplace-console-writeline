@@ -1,8 +1,8 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerControllerHaitam : MonoBehaviour
 {
-    
     [Header("Movement")]
     public float moveSpeed = 5f;
     public float rotationSmoothTime = 0.1f;
@@ -20,30 +20,15 @@ public class PlayerController : MonoBehaviour
     private float turnSmoothVelocity;
     private float xRotation = 0f;
 
-    private GameObject bucket;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        bucket = transform.Find("Bucket").gameObject;
         controller = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
         Cursor.lockState = CursorLockMode.Locked; // cursor weg
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-
-            if (bucket.active)
-                bucket.SetActive(false);
-            else
-            {
-                bucket.transform.Find("water_splash").gameObject.SetActive(false);
-                bucket.SetActive(true);
-            }
-        }
         HandleCamera();
         HandleMovement();
         HandleGravityAndJump();
