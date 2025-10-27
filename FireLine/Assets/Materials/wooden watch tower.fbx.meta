@@ -1,9 +1,19 @@
 fileFormatVersion: 2
-guid: 49080d90b07e4bb45afd6c1b4de98959
+guid: e894b1fa17967414c885f54d134fe895
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: a89cea3e928d6804c92573ea8858948f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: watchtower
+    second: {fileID: 2100000, guid: 8e5b3d41cb15f5b4d90703af08f96ccf, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
