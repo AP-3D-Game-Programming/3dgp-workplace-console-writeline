@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Debug = UnityEngine.Debug;
 
 public class Bucket : MonoBehaviour
 {
@@ -14,28 +15,47 @@ public class Bucket : MonoBehaviour
     private float roateSpeed = 3f;
 	private float tiltHoldTime = 0f; // Timer for how long to hold the tilt
 	private float tiltMaxHoldTime = 1f; // 3 seconds
+	[SerializeField] private Transform waterSplash;
 
 	public GameObject sphereColliderPrefab;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+	private InventoryManager inventoryManager;
+
+
+	// Start is called once before the first execution of Update after the MonoBehaviour is created
+	void Start()
+	{
 		isRotatingForward = false;
 		rotateThisFrame = 0;
 		isRotatingBackward = false;
+		tiltHoldTime = 0f;
+
+		inventoryManager = Object.FindFirstObjectByType<InventoryManager>();
+
+		if (waterSplash == null)
+			Debug.Log("Water splash not assigned in Inspector!");
 	}
+
 
 	// Update is called once per frame
 	void Update()
     {
+		if (!IsBucketEquipped())
+			return;
 
 		if (Input.GetMouseButton(0))
 		{
 			if (rotateThisFrame == 0)
 			{
 				isRotatingForward = true;
-				transform.Find("water_splash").gameObject.SetActive(false);
-				transform.Find("water_splash").gameObject.SetActive(true);
+				// Look for water_splash in the bucket model child
+				if (waterSplash != null)
+				{
+					waterSplash.gameObject.SetActive(false);
+					waterSplash.gameObject.SetActive(true);
+				}
+
+
 				Instantiate(sphereColliderPrefab, transform);
 			}
 		}
@@ -68,5 +88,11 @@ public class Bucket : MonoBehaviour
 			if (rotateThisFrame <= 0)
 				isRotatingBackward = false;
 		}
+	}
+	private bool IsBucketEquipped()
+	{
+		if (inventoryManager == null) return false;
+		Tool equipped = inventoryManager.GetCurrentTool();
+		return equipped != null && equipped.toolName == "Bucket";
 	}
 }

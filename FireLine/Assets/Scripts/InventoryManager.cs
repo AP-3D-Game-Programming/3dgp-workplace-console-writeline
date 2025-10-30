@@ -13,6 +13,9 @@ public class InventoryManager : MonoBehaviour
 	private Tool[] hotbarInventory;
 	private int currentToolIndex = 0;
 
+	// Tools
+	[SerializeField] private GameObject bucketModel;
+
 	void Start()
 	{
 		CreateHotbarSlots();
@@ -148,6 +151,7 @@ public class InventoryManager : MonoBehaviour
 		{
 			SelectPreviousTool();
 		}
+		UpdateEquippedItem();
 	}
 
 	private void SelectNextTool()
@@ -161,4 +165,15 @@ public class InventoryManager : MonoBehaviour
 		int prevSlot = (currentToolIndex - 1 + hotbarSize) % hotbarSize;
 		SelectTool(prevSlot);
 	}
+
+	private void UpdateEquippedItem()
+	{
+		Tool currentTool = GetCurrentTool();
+
+		if (bucketModel != null) bucketModel.SetActive(false);
+
+		if (currentTool != null && currentTool.toolName == "Bucket" && bucketModel != null)
+			bucketModel.SetActive(true);
+	}
+
 }
