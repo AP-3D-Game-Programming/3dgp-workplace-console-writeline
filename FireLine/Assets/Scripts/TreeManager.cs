@@ -52,7 +52,7 @@ public class TreeManager : MonoBehaviour
         var toRemove = new List<GameObject>();
         foreach (var realTree in realTrees)
         {
-            if (!realTree.transform.Find("Fire Indicator").gameObject.active &&
+            if (!realTree.transform.Find("Fire Indicator").gameObject.activeSelf &&
                 Vector3.Distance(player.transform.position, realTree.transform.position) > 10f)
             {
                 // Save position before destroying

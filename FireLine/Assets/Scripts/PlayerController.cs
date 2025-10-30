@@ -35,8 +35,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-
-            if (bucket.active)
+            if (bucket.activeSelf)
                 bucket.SetActive(false);
             else
             {
