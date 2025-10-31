@@ -126,11 +126,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 10
-  rotationSmoothTime: 0.1
+  sprintSpeed: 8
+  rotationSpeed: 10
+  mouseSensitivity: 130
   jumpHeight: 4
   gravity: -9.81
-  cameraTransform: {fileID: 1411228959209422514}
-  mouseSensitivity: 130
+  firstPersonCam: {fileID: 0}
+  thirdPersonCam: {fileID: 0}
+  cameraHolder: {fileID: 0}
 --- !u!143 &6970800296845730811
 CharacterController:
   m_ObjectHideFlags: 0
