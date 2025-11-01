@@ -85,9 +85,14 @@ public class PlayerControllerHaitam : MonoBehaviour
 
     void HandleMovement()
     {
+        bool wasGrounded = isGrounded;
         isGrounded = controller.isGrounded;
+
+        // Ground stabilisatie: gebruik kleine buffer
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
+        else if (!isGrounded && wasGrounded && velocity.y <= 0)
+            velocity.y = -1f; // voorkomt dat je korte luchtmomenten als jump ziet
 
         isSprinting = Input.GetKey(KeyCode.LeftShift);
 
@@ -124,7 +129,7 @@ public class PlayerControllerHaitam : MonoBehaviour
         bool isJumpingNow = !isGrounded;
         bool isSprintingNow = Input.GetKey(KeyCode.LeftShift) && !isJumpingNow && anim.GetFloat("Speed") > 0.1f;
 
-        anim.SetBool("isJumping", isJumpingNow);
+        anim.SetBool("isJumping", !isGrounded && velocity.y > 0.1f);
         anim.SetBool("isSprinting", isSprintingNow);
 
         if (!isJumpingNow)
