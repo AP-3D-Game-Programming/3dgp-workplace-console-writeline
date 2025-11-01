@@ -7,6 +7,7 @@ public class DayManager : MonoBehaviour
 
 	[SerializeField] private int currentDay = 1;
 	[SerializeField] private TaskListManager taskListManager;
+	[SerializeField] private Light sun; // Add this
 	private bool hasCompletedDailyTasks = false;
 	private bool canSleep = false;
 
@@ -22,18 +23,23 @@ public class DayManager : MonoBehaviour
 
 	void Start()
 	{
+		if (sun == null)
+			sun = FindObjectOfType<Light>();
+
 		StartNewDay();
 	}
 
 	void Update()
 	{
-		// Check if day ended (midnight reached)
 		if (TimeManager.Instance.HasDayEnded())
 		{
 			if (!hasCompletedDailyTasks)
 			{
 				Debug.Log("GAME OVER! You didn't complete your tasks before midnight!");
-				// TODO: Show game over screen or fail state
+			}
+			if (taskListManager.AreAllTasksComplete() && !hasCompletedDailyTasks)
+			{
+				CompleteAllDailyTasks();
 			}
 		}
 	}
@@ -48,21 +54,19 @@ public class DayManager : MonoBehaviour
 		taskListManager.ClearAllTasks();
 		GenerateDailyTasks();
 
-		// Reset the day/night cycle
+		// Reset the day/night cycle and sun position
 		TimeManager.Instance.ResetDay();
+		sun.transform.rotation = Quaternion.Euler(0, 0, 0); // Reset sun to sunrise (0 degrees)
 	}
 
 	private void GenerateDailyTasks()
 	{
-		// Tasks get harder each day
-		int taskDifficulty = currentDay;
-
 		if (currentDay == 1)
 		{
-			taskListManager.AddObjective("Daily: Water the plants", new List<string>
+			taskListManager.AddObjective("Prepare the campfire", new List<string>
 			{
-				"Fill your bucket with water",
-				"Water the plants"
+				"Chop 3 wood  0/3",
+				"Put the wood on the fire"
 			});
 		}
 		else if (currentDay == 2)
@@ -79,7 +83,6 @@ public class DayManager : MonoBehaviour
 		}
 		else
 		{
-			// Add more tasks as days progress
 			taskListManager.AddObjective("Patrol the forest", new List<string>
 			{
 				"Check north area",
@@ -98,7 +101,7 @@ public class DayManager : MonoBehaviour
 
 	public void ProgressToNextDay()
 	{
-		if (!canSleep && !TimeManager.Instance.HasDayEnded())
+		if (!canSleep)
 		{
 			Debug.Log("You haven't completed your daily tasks yet!");
 			return;

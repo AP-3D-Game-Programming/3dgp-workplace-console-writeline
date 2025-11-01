@@ -1,25 +1,23 @@
 using UnityEngine;
+using System.Collections;
 
 public class BedInteraction : MonoBehaviour
 {
-	[SerializeField] private float interactionRange = 2f; // How close player needs to be
-	[SerializeField] private Canvas interactionPromptUI; // Your UI canvas with the prompt
+	[SerializeField] private float interactionRange = 2f;
+	[SerializeField] private Canvas interactionPromptUI;
 	private bool isPlayerNearby = false;
 	private SphereCollider triggerCollider;
 
 	void Start()
 	{
-		// Disable the prompt UI on start
 		interactionPromptUI.gameObject.SetActive(false);
 
-		// Get or create a sphere collider and set its radius based on interactionRange
 		triggerCollider = GetComponent<SphereCollider>();
 		if (triggerCollider == null)
 		{
 			triggerCollider = gameObject.AddComponent<SphereCollider>();
 		}
 
-		// Set the collider radius to match the interaction range
 		triggerCollider.radius = interactionRange;
 		triggerCollider.isTrigger = true;
 	}
@@ -29,7 +27,7 @@ public class BedInteraction : MonoBehaviour
 		if (other.CompareTag("Player"))
 		{
 			isPlayerNearby = true;
-			interactionPromptUI.gameObject.SetActive(true); // Show "Press E to sleep"
+			interactionPromptUI.gameObject.SetActive(true);
 		}
 	}
 
@@ -38,7 +36,7 @@ public class BedInteraction : MonoBehaviour
 		if (other.CompareTag("Player"))
 		{
 			isPlayerNearby = false;
-			interactionPromptUI.gameObject.SetActive(false); // Hide prompt
+			interactionPromptUI.gameObject.SetActive(false);
 		}
 	}
 
@@ -62,8 +60,16 @@ public class BedInteraction : MonoBehaviour
 		interactionPromptUI.gameObject.SetActive(false);
 		isPlayerNearby = false;
 
-		DayManager.Instance.ProgressToNextDay();
+		// Start the fade animation and sleep sequence
+		StartCoroutine(SleepSequence());
 	}
 
+	private IEnumerator SleepSequence()
+	{
+		// Fade to black, reset day, fade back
+		yield return StartCoroutine(FadeManager.Instance.FadeToBlackAndBack());
 
+		// Progress to next day (sun will be reset to 0 inside DayManager)
+		DayManager.Instance.ProgressToNextDay();
+	}
 }
