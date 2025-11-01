@@ -30,6 +30,7 @@ public class InventoryManager : MonoBehaviour
 		for (int i = 0; i < hotbarSize; i++)
 		{
 			GameObject slot = Instantiate(toolSlotPrefab, hotbarContainer, false);
+			slot.transform.localScale = Vector3.one;
 			slot.name = "Slot " + i;
 			hotbarSlots[i] = slot.transform;
 		}
@@ -174,6 +175,12 @@ public class InventoryManager : MonoBehaviour
 
 		if (currentTool != null && currentTool.toolName == "Bucket" && bucketModel != null)
 			bucketModel.SetActive(true);
+	}
+	// After player completes all mandatory tasks
+	public void OnAllMandatoryTasksCompleted()
+	{
+		Debug.Log("Player completed all mandatory tasks!");
+		DayManager.Instance.CompleteAllDailyTasks();
 	}
 
 }

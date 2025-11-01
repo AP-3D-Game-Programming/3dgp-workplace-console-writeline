@@ -96,4 +96,15 @@ public class TaskListManager : MonoBehaviour
 		}
 	}
 
+	public void ClearAllTasks()
+	{
+		foreach (GameObject obj in activeObjectives)
+		{
+			Destroy(obj);
+		}
+		activeObjectives.Clear();
+		Debug.Log("All tasks cleared");
+	}
+
+
 }
