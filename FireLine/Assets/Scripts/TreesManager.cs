@@ -27,16 +27,17 @@ public class TreesManager : MonoBehaviour
                 RealWorldPos = GetRealWorldTreePos(treeInstance),
                 RealWorldRotation = GetQuaternionFromFloat(treeInstance.rotation)
             });
+            
         }
+
 
         InvokeRepeating("HandleTreeSpawning", 0.5f, 0.5f);
         InvokeRepeating("BurnRandomTree", 1f, 1f);
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnApplicationQuit()
     {
-
+        terrainData.treeInstances = trees.Select(t => t.TreeInstance).ToArray();
     }
     private void SpawnNearestTrees()
     {

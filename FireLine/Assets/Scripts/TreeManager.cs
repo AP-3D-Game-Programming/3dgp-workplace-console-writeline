@@ -21,7 +21,6 @@ public class TreeManager : MonoBehaviour
         deadTimer = 10;
         fireIndicator = fireIndicatorTransform.GetComponent<FireIndicator>();
         fireIndicator.OnFireStateChange += HandleFireChange;
-        Debug.Log(fireIndicator);
     }
     void OnDestroy()
     {

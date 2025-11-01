@@ -1,10 +1,9 @@
-using System.Diagnostics;
-using NUnit.Framework;
-using Unity.Mathematics;
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Debug = UnityEngine.Debug;
+using System.Collections;
+using NUnit.Framework;
+
 
 public class Bucket : MonoBehaviour
 {
@@ -15,6 +14,8 @@ public class Bucket : MonoBehaviour
     private float roateSpeed = 3f;
 	private float tiltHoldTime = 0f; // Timer for how long to hold the tilt
 	private float tiltMaxHoldTime = 1f; // 3 seconds
+
+	// Makes it public without letting other scripts able to use this varaible.
 	[SerializeField] private Transform waterSplash;
 
 	public GameObject sphereColliderPrefab;
@@ -22,15 +23,16 @@ public class Bucket : MonoBehaviour
 	private InventoryManager inventoryManager;
 
 
-	// Start is called once before the first execution of Update after the MonoBehaviour is created
-	void Start()
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    void Start()
 	{
 		isRotatingForward = false;
 		rotateThisFrame = 0;
 		isRotatingBackward = false;
 		tiltHoldTime = 0f;
 
-		inventoryManager = Object.FindFirstObjectByType<InventoryManager>();
+		inventoryManager = UnityEngine.Object.FindFirstObjectByType<InventoryManager>();
 
 		if (waterSplash == null)
 			Debug.Log("Water splash not assigned in Inspector!");
@@ -39,7 +41,8 @@ public class Bucket : MonoBehaviour
 
 	// Update is called once per frame
 	void Update()
-    {
+	{
+
 		if (!IsBucketEquipped())
 			return;
 
@@ -51,10 +54,8 @@ public class Bucket : MonoBehaviour
 				// Look for water_splash in the bucket model child
 				if (waterSplash != null)
 				{
-					waterSplash.gameObject.SetActive(false);
 					waterSplash.gameObject.SetActive(true);
 				}
-
 
 				Instantiate(sphereColliderPrefab, transform);
 			}
@@ -86,7 +87,10 @@ public class Bucket : MonoBehaviour
 			transform.Rotate(Vector3.left * roateSpeed);
 			rotateThisFrame -= roateSpeed;
 			if (rotateThisFrame <= 0)
+            {
 				isRotatingBackward = false;
+				waterSplash.gameObject.SetActive(false);
+            }
 		}
 	}
 	private bool IsBucketEquipped()
@@ -95,4 +99,5 @@ public class Bucket : MonoBehaviour
 		Tool equipped = inventoryManager.GetCurrentTool();
 		return equipped != null && equipped.toolName == "Bucket";
 	}
+
 }

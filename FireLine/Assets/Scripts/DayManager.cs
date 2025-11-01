@@ -28,14 +28,14 @@ public class DayManager : MonoBehaviour
 	void Update()
 	{
 		// Check if day ended (midnight reached)
-		if (TimeManager.Instance.HasDayEnded())
-		{
-			if (!hasCompletedDailyTasks)
-			{
-				Debug.Log("GAME OVER! You didn't complete your tasks before midnight!");
-				// TODO: Show game over screen or fail state
-			}
-		}
+		// if (TimeManager.Instance.HasDayEnded())
+		// {
+		// 	if (!hasCompletedDailyTasks)
+		// 	{
+		// 		Debug.Log("GAME OVER! You didn't complete your tasks before midnight!");
+		// 		// TODO: Show game over screen or fail state
+		// 	}
+		// }
 	}
 
 	private void StartNewDay()
