@@ -16,15 +16,7 @@ public class waterCollider : MonoBehaviour
     {
 
     }
-    // void OnTriggerEnter(Collider other)
-    // {
 
-    //     if (other != null) ;
-    //     {
-    //         other.transform.Find("Fire Indicator").gameObject.SetActive(false);
-    //     }
-    //     Destroy(gameObject);
-    // }
     void OnCollisionEnter(Collision collision)
     {
         if (collision != null)

@@ -43,10 +43,10 @@ public class PlayerController : MonoBehaviour
                 bucket.SetActive(true);
             }
         }
-        HandleCamera();
-        HandleMovement();
-        HandleGravityAndJump();
-        UpdateAnimations();
+        // HandleCamera();
+        // HandleMovement();
+        // HandleGravityAndJump();
+        // UpdateAnimations();
     }
 
     void HandleCamera()
