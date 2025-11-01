@@ -1,12 +1,12 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DayManager : MonoBehaviour
 {
 	public static DayManager Instance { get; private set; }
 
 	[SerializeField] private int currentDay = 1;
-	[SerializeField] private TaskListManager taskListManager; // Reference to your task manager
+	[SerializeField] private TaskListManager taskListManager;
 	private bool hasCompletedDailyTasks = false;
 	private bool canSleep = false;
 
@@ -25,6 +25,19 @@ public class DayManager : MonoBehaviour
 		StartNewDay();
 	}
 
+	void Update()
+	{
+		// Check if day ended (midnight reached)
+		if (TimeManager.Instance.HasDayEnded())
+		{
+			if (!hasCompletedDailyTasks)
+			{
+				Debug.Log("GAME OVER! You didn't complete your tasks before midnight!");
+				// TODO: Show game over screen or fail state
+			}
+		}
+	}
+
 	private void StartNewDay()
 	{
 		hasCompletedDailyTasks = false;
@@ -32,41 +45,45 @@ public class DayManager : MonoBehaviour
 
 		Debug.Log("Day " + currentDay + " started!");
 
-		// Clear old tasks
-		// TODO: Add a ClearAllTasks() method to TaskListManager
-
-		// Generate and assign today's daily tasks
+		taskListManager.ClearAllTasks();
 		GenerateDailyTasks();
+
+		// Reset the day/night cycle
+		TimeManager.Instance.ResetDay();
 	}
 
 	private void GenerateDailyTasks()
 	{
-		// Define which tasks are mandatory each day
-		// You can randomize them or make them fixed per day
+		// Tasks get harder each day
+		int taskDifficulty = currentDay;
 
 		if (currentDay == 1)
 		{
-			taskListManager.AddObjective("Daily Task: Water the flowers", new List<string>
+			taskListManager.AddObjective("Daily: Water the plants", new List<string>
 			{
-				"Add water to your bucket",
-				"Water the flowers 0/3"
+				"Fill your bucket with water",
+				"Water the plants"
 			});
 		}
 		else if (currentDay == 2)
 		{
-			taskListManager.AddObjective("Daily Task: Check the watchtower", new List<string>
+			taskListManager.AddObjective("Check the watchtower", new List<string>
 			{
 				"Climb the tower",
 				"Look for smoke"
 			});
+			taskListManager.AddObjective("Prepare the campfire", new List<string>
+			{
+				"Chop 5 wood  0/5"
+			});
 		}
 		else
 		{
-			// Repeat or randomize tasks for later days
-			taskListManager.AddObjective("Daily Task: Prepare the campfire", new List<string>
+			// Add more tasks as days progress
+			taskListManager.AddObjective("Patrol the forest", new List<string>
 			{
-				"Chop 3 wood  0/3",
-				"Put the wood on the fire"
+				"Check north area",
+				"Check south area"
 			});
 		}
 	}
@@ -81,7 +98,7 @@ public class DayManager : MonoBehaviour
 
 	public void ProgressToNextDay()
 	{
-		if (!canSleep)
+		if (!canSleep && !TimeManager.Instance.HasDayEnded())
 		{
 			Debug.Log("You haven't completed your daily tasks yet!");
 			return;
@@ -99,10 +116,5 @@ public class DayManager : MonoBehaviour
 	public bool CanSleep()
 	{
 		return canSleep;
-	}
-
-	public bool HasCompletedDailyTasks()
-	{
-		return hasCompletedDailyTasks;
 	}
 }

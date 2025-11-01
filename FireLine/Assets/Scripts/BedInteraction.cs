@@ -54,8 +54,7 @@ public class BedInteraction : MonoBehaviour
 	{
 		if (!DayManager.Instance.CanSleep())
 		{
-			Debug.Log("You need to finish your daily tasks first!");
-			// TODO: Show UI warning message
+			Debug.Log("You need to finish your daily tasks before midnight!");
 			return;
 		}
 
@@ -65,5 +64,6 @@ public class BedInteraction : MonoBehaviour
 
 		DayManager.Instance.ProgressToNextDay();
 	}
+
 
 }
