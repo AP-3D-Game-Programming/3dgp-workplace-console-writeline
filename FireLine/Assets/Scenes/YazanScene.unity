@@ -490,10 +490,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2363063297675121684, guid: 9e020dba3c7d9ff49b4abbfa143d040c, type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 8616685848631341930}
     - target: {fileID: 6670353155166397007, guid: 9e020dba3c7d9ff49b4abbfa143d040c, type: 3}
       propertyPath: m_Name
       value: MainMap
@@ -587,11 +583,6 @@ PrefabInstance:
       addedObject: {fileID: 1299093201}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6841af64b12ae2f4aaef0bfd304b4aa1, type: 3}
---- !u!1 &8616685848631341930 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4486916298205635385, guid: 6841af64b12ae2f4aaef0bfd304b4aa1, type: 3}
-  m_PrefabInstance: {fileID: 2246398522636182868}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8997996947310520784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4817940643657799159, guid: 6841af64b12ae2f4aaef0bfd304b4aa1, type: 3}
