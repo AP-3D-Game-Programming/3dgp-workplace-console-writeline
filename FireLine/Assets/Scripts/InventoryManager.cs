@@ -5,16 +5,20 @@ using System.Collections.Generic;
 
 public class InventoryManager : MonoBehaviour
 {
-	[SerializeField] private GameObject toolSlotPrefab; // Single prefab
-	[SerializeField] private Transform hotbarContainer; // The Hotbar empty GameObject
-	[SerializeField] private int hotbarSize = 4; // How many slots to create
+	[SerializeField] private GameObject toolSlotPrefab;
+	[SerializeField] private Transform hotbarContainer;
+	[SerializeField] private int hotbarSize = 4;
+	[SerializeField] private Transform equipmentSlot; // Where equipped item appears
 
 	private Transform[] hotbarSlots;
 	private Tool[] hotbarInventory;
 	private int currentToolIndex = 0;
 
-	// Tools
+	// Tool models
 	[SerializeField] private GameObject bucketModel;
+	[SerializeField] private GameObject axeModel;
+
+	private GameObject currentEquippedModel = null;
 
 	void Start()
 	{
@@ -36,17 +40,14 @@ public class InventoryManager : MonoBehaviour
 		}
 	}
 
-
 	private void InitializeInventory()
 	{
-		// Load the PNG files directly as Texture2D first
 		Texture2D axeTexture = Resources.Load<Texture2D>("Sprites/axe");
 		Texture2D bucketTexture = Resources.Load<Texture2D>("Sprites/bucket");
 
 		Debug.Log("Axe texture loaded: " + (axeTexture != null ? "YES" : "NO"));
 		Debug.Log("Bucket texture loaded: " + (bucketTexture != null ? "YES" : "NO"));
 
-		// If textures loaded, use them
 		Sprite axeIcon = null;
 		Sprite bucketIcon = null;
 
@@ -67,7 +68,6 @@ public class InventoryManager : MonoBehaviour
 
 		SelectTool(0);
 	}
-
 
 	private void UpdateSlotDisplay(int slotIndex)
 	{
@@ -109,7 +109,7 @@ public class InventoryManager : MonoBehaviour
 		if (slotIndex < 0 || slotIndex >= hotbarSize) return;
 
 		// Deselect previous
-		hotbarSlots[currentToolIndex].GetComponent<Image>().color = new Color(0f, 0f, 0f, 40f / 255f); // 0,0,0,40 converted to 0-1 range
+		hotbarSlots[currentToolIndex].GetComponent<Image>().color = new Color(0f, 0f, 0f, 40f / 255f);
 
 		// Select new
 		currentToolIndex = slotIndex;
@@ -127,7 +127,6 @@ public class InventoryManager : MonoBehaviour
 
 	public Tool GetCurrentTool()
 	{
-		// Returns null if empty slot is selected
 		return hotbarInventory[currentToolIndex];
 	}
 
@@ -144,11 +143,11 @@ public class InventoryManager : MonoBehaviour
 
 		// Scroll wheel
 		float scroll = Input.GetAxis("Mouse ScrollWheel");
-		if (scroll > 0f) // Scroll up
+		if (scroll > 0f)
 		{
 			SelectNextTool();
 		}
-		else if (scroll < 0f) // Scroll down
+		else if (scroll < 0f)
 		{
 			SelectPreviousTool();
 		}
@@ -171,16 +170,40 @@ public class InventoryManager : MonoBehaviour
 	{
 		Tool currentTool = GetCurrentTool();
 
+		// Unequip all models
 		if (bucketModel != null) bucketModel.SetActive(false);
+		if (axeModel != null) axeModel.SetActive(false);
 
-		if (currentTool != null && currentTool.toolName == "Bucket" && bucketModel != null)
-			bucketModel.SetActive(true);
+		// Equip selected tool
+		if (currentTool != null)
+		{
+			if (currentTool.toolName == "Bucket" && bucketModel != null)
+			{
+				bucketModel.SetActive(true);
+				currentEquippedModel = bucketModel;
+			}
+			else if (currentTool.toolName == "Axe" && axeModel != null)
+			{
+				axeModel.SetActive(true);
+				currentEquippedModel = axeModel;
+			}
+		}
+		else
+		{
+			currentEquippedModel = null;
+		}
 	}
+
+	// Get currently equipped model
+	public GameObject GetEquippedModel()
+	{
+		return currentEquippedModel;
+	}
+
 	// After player completes all mandatory tasks
 	public void OnAllMandatoryTasksCompleted()
 	{
 		Debug.Log("Player completed all mandatory tasks!");
 		DayManager.Instance.CompleteAllDailyTasks();
 	}
-
 }
