@@ -30,6 +30,7 @@ public class InventoryManager : MonoBehaviour
 		for (int i = 0; i < hotbarSize; i++)
 		{
 			GameObject slot = Instantiate(toolSlotPrefab, hotbarContainer, false);
+			slot.transform.localScale = Vector3.one;
 			slot.name = "Slot " + i;
 			hotbarSlots[i] = slot.transform;
 		}

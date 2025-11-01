@@ -1199,6 +1199,7 @@ MonoBehaviour:
   toolSlotPrefab: {fileID: 1197074442}
   hotbarContainer: {fileID: 250664864}
   hotbarSize: 4
+  bucketModel: {fileID: 0}
 --- !u!4 &460252366
 Transform:
   m_ObjectHideFlags: 0
@@ -1575,7 +1576,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5721014644261881546, guid: d8ed864e2a3dcf444b57436ca008a075, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1305.3124
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5721014644261881546, guid: d8ed864e2a3dcf444b57436ca008a075, type: 3}
       propertyPath: m_LocalRotation.w
