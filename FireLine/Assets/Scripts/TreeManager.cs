@@ -9,6 +9,8 @@ public class TreeManager : MonoBehaviour
     private int amountSecOnFire;
     public bool Burned;
 
+    private int deadTimer;
+
     public event Action<TreeManager> OnBurnedStateChange;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -16,6 +18,7 @@ public class TreeManager : MonoBehaviour
     {
         amountSecOnFire = 0;
         Burned = false;
+        deadTimer = 10;
         fireIndicator = fireIndicatorTransform.GetComponent<FireIndicator>();
         fireIndicator.OnFireStateChange += HandleFireChange;
         Debug.Log(fireIndicator);
@@ -31,7 +34,7 @@ public class TreeManager : MonoBehaviour
             StartTimer();
         } else
         {
-            if (endTimer() >= 3 && !Burned)
+            if (endTimer() >= deadTimer && !Burned)
             {
                 Burned = true;
                 OnBurnedStateChange.Invoke(this);
@@ -55,7 +58,7 @@ public class TreeManager : MonoBehaviour
     void AddOneSec()
     {
         amountSecOnFire++;
-        if (amountSecOnFire >= 3)
+        if (amountSecOnFire >= deadTimer)
             fireIndicator.gameObject.SetActive(false);
     }
     
