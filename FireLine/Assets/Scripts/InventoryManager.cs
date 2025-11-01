@@ -176,5 +176,11 @@ public class InventoryManager : MonoBehaviour
 		if (currentTool != null && currentTool.toolName == "Bucket" && bucketModel != null)
 			bucketModel.SetActive(true);
 	}
+	// After player completes all mandatory tasks
+	public void OnAllMandatoryTasksCompleted()
+	{
+		Debug.Log("Player completed all mandatory tasks!");
+		DayManager.Instance.CompleteAllDailyTasks();
+	}
 
 }

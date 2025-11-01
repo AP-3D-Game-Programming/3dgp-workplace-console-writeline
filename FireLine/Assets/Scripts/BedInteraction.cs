@@ -52,7 +52,18 @@ public class BedInteraction : MonoBehaviour
 
 	private void Sleep()
 	{
+		if (!DayManager.Instance.CanSleep())
+		{
+			Debug.Log("You need to finish your daily tasks first!");
+			// TODO: Show UI warning message
+			return;
+		}
+
 		Debug.Log("Player is sleeping!");
-		// TODO: Call your GameManager or DayManager to progress to next day
+		interactionPromptUI.gameObject.SetActive(false);
+		isPlayerNearby = false;
+
+		DayManager.Instance.ProgressToNextDay();
 	}
+
 }
