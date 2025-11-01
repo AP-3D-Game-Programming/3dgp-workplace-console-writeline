@@ -45,14 +45,12 @@ public class TreeManager : MonoBehaviour
     void StartTimer()
     {
         InvokeRepeating("AddOneSec", 1f, 1f);
-        Debug.Log("timer started");
     }
     int endTimer()
     {
         CancelInvoke("AddOneSec");
         var time = amountSecOnFire;
         amountSecOnFire = 0;
-        Debug.Log("TIMER ENDED");
         return time;
     }
     void AddOneSec()
