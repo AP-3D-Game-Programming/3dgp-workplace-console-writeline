@@ -46,6 +46,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Terrain
       objectReference: {fileID: 0}
+    - target: {fileID: 3491819018752970761, guid: 6f9acd7b0384f6c4a89d4ba214cb240f, type: 3}
+      propertyPath: m_TagString
+      value: Terrain
+      objectReference: {fileID: 0}
     - target: {fileID: 6753768368539458996, guid: 6f9acd7b0384f6c4a89d4ba214cb240f, type: 3}
       propertyPath: m_LocalPosition.x
       value: -250
@@ -345,6 +349,10 @@ PrefabInstance:
     - target: {fileID: 2894415734239889998, guid: a20e00410ce5742439cff4040bf7d9b4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3331790187408153890, guid: a20e00410ce5742439cff4040bf7d9b4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -217.42
       objectReference: {fileID: 0}
     - target: {fileID: 9183320172874835711, guid: a20e00410ce5742439cff4040bf7d9b4, type: 3}
       propertyPath: m_Name
