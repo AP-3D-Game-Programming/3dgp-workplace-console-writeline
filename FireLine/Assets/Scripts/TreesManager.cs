@@ -108,7 +108,6 @@ public class TreesManager : MonoBehaviour
             treeModel.RealTree = Instantiate(BurnedtreePrefabs[treeModel.TreeInstance.prototypeIndex], treeModel.RealWorldPos, treeModel.RealWorldRotation);
             treeModel.RealTree.GetComponent<TreeManager>().Burned = true;
             treeModel.setRealTreeCorrectScale();
-            Debug.Log("DEAD TREE SHOULD SPAWN!!!");
         }
     }
     private void BurnRandomTree()
