@@ -6,7 +6,7 @@ public class DayManager : MonoBehaviour
 	public static DayManager Instance { get; private set; }
 
 	[SerializeField] private int currentDay = 1;
-	[SerializeField] private TaskListManager taskListManager;
+	[SerializeField] public TaskListManager taskListManager;
 	[SerializeField] private Light sun; // Add this
 	private bool hasCompletedDailyTasks = false;
 	private bool canSleep = false;
@@ -24,7 +24,7 @@ public class DayManager : MonoBehaviour
 	void Start()
 	{
 		if (sun == null)
-			sun = FindObjectOfType<Light>();
+			sun = Object.FindFirstObjectByType<Light>();
 
 		StartNewDay();
 	}

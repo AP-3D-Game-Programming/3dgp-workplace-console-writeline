@@ -50,11 +50,15 @@ public class BedInteraction : MonoBehaviour
 
 	private void Sleep()
 	{
-		if (!DayManager.Instance.CanSleep())
+		// Check if all tasks are actually complete
+		if (!DayManager.Instance.taskListManager.AreAllTasksComplete())
 		{
-			Debug.Log("You need to finish your daily tasks before midnight!");
+			Debug.Log("You need to finish your daily tasks before sleeping!");
 			return;
 		}
+
+		// If tasks are complete, mark them as done
+		DayManager.Instance.CompleteAllDailyTasks();
 
 		Debug.Log("Player is sleeping!");
 		interactionPromptUI.gameObject.SetActive(false);
@@ -66,10 +70,10 @@ public class BedInteraction : MonoBehaviour
 
 	private IEnumerator SleepSequence()
 	{
-		// Fade to black, reset day, fade back
-		yield return StartCoroutine(FadeManager.Instance.FadeToBlackAndBack());
-
-		// Progress to next day (sun will be reset to 0 inside DayManager)
-		DayManager.Instance.ProgressToNextDay();
+		// Fade to black, generate new day tasks while black, fade back
+		yield return StartCoroutine(FadeManager.Instance.FadeToBlackAndBack(() =>
+		{
+			DayManager.Instance.ProgressToNextDay();
+		}));
 	}
 }

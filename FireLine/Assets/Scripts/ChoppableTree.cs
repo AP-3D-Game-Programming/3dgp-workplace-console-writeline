@@ -20,7 +20,7 @@ public class ChoppableTree : MonoBehaviour
 	void ChopTree()
 	{
 		// Get TaskListManager reference
-		TaskListManager taskManager = FindObjectOfType<TaskListManager>();
+		TaskListManager taskManager = Object.FindFirstObjectByType<TaskListManager>();
 
 		// Spawn the chopped version
 		Vector3 spawnPos = transform.position;

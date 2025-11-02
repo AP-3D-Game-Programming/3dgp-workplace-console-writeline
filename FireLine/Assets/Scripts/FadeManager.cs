@@ -18,18 +18,36 @@ public class FadeManager : MonoBehaviour
 		Instance = this;
 	}
 
-	// Fade to black and back (for sleeping)
-	public IEnumerator FadeToBlackAndBack()
+	void Start()
+{
+    fadeCanvasGroup.transform.SetAsLastSibling(); // Puts it on top
+    fadeCanvasGroup.alpha = 0f;
+    Debug.Log("FadeManager initialized. Alpha: " + fadeCanvasGroup.alpha);
+}
+
+
+	public IEnumerator FadeToBlackAndBack(System.Action onFullyBlack = null)
 	{
+		Debug.Log("Starting fade...");
+
 		// Fade to black
 		yield return StartCoroutine(FadeIn());
 
-		// Wait while black (this is when day resets)
-		yield return new WaitForSeconds(1f);
+		// Now fully black - call the callback to update tasks
+		if (onFullyBlack != null)
+		{
+			onFullyBlack.Invoke();
+		}
 
-		// Fade back to normal
+
+		yield return new WaitForSeconds(0.5f);
+
+		// Fade back
 		yield return StartCoroutine(FadeOut());
+
+		Debug.Log("Fade complete");
 	}
+
 
 	private IEnumerator FadeIn()
 	{
