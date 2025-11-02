@@ -57,4 +57,29 @@ public class SubtaskUI : MonoBehaviour
 	{
 		return isComplete;
 	}
+
+	public void UpdateProgress(int currentValue)
+	{
+		if (subtaskText != null)
+		{
+			// Extract the total from the text
+			string[] parts = subtaskText.text.Split('/');
+			if (parts.Length > 1)
+			{
+				int total = int.Parse(parts[1]);
+				subtaskText.text = $"Chop {currentValue} wood  {currentValue}/{total}";
+
+				if (currentValue >= total)
+				{
+					MarkComplete();
+				}
+			}
+		}
+	}
+
+	public string GetTaskText()
+	{
+		return subtaskText != null ? subtaskText.text : "";
+	}
+
 }

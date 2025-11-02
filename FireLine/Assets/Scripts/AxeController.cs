@@ -3,7 +3,7 @@ using System.Collections;
 
 public class AxeController : MonoBehaviour
 {
-	[SerializeField] private Transform axeModel; // Drag the axe model here
+	[SerializeField] private Transform axeModel;
 	[SerializeField] private TaskListManager taskListManager;
 	[SerializeField] private float swingCooldown = 0.8f;
 
@@ -13,7 +13,7 @@ public class AxeController : MonoBehaviour
 
 	void Start()
 	{
-		inventoryManager = FindObjectOfType<InventoryManager>();
+		inventoryManager = Object.FindFirstObjectByType<InventoryManager>();
 	}
 
 	void Update()
@@ -24,12 +24,14 @@ public class AxeController : MonoBehaviour
 
 		if (currentTool != null && currentTool.toolName == "Axe")
 		{
-			if (Input.GetMouseButtonDown(0) && !isSwinging && Time.time >= lastSwingTime + swingCooldown)
+			// Only swing on left click
+			if (Input.GetMouseButtonDown(0) && !isSwinging && Time.time - lastSwingTime >= swingCooldown)
 			{
 				StartCoroutine(SwingAxe());
 			}
 		}
 	}
+
 
 	private IEnumerator SwingAxe()
 	{
@@ -37,13 +39,13 @@ public class AxeController : MonoBehaviour
 		lastSwingTime = Time.time;
 
 		float elapsed = 0f;
-		float swingDuration = 0.5f; // Match your 30-frame animation
+		float swingDuration = 0.5f;
 
 		Vector3 startRotation = new Vector3(-37.224f, -180f, 90f);
 		Vector3 swingRotation = new Vector3(15f, -180f, 90f);
 		Vector3 endRotation = new Vector3(-37.224f, -180f, 90f);
 
-		// Swing forward (0 to 10 frames)
+		// Swing forward
 		while (elapsed < swingDuration / 3)
 		{
 			elapsed += Time.deltaTime;
@@ -52,7 +54,7 @@ public class AxeController : MonoBehaviour
 			yield return null;
 		}
 
-		// Swing down (10 to 20 frames)
+		// Swing down
 		elapsed = 0f;
 		while (elapsed < swingDuration / 3)
 		{
@@ -74,5 +76,4 @@ public class AxeController : MonoBehaviour
 
 		isSwinging = false;
 	}
-
 }

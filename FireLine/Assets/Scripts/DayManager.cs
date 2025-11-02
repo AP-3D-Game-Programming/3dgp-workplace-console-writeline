@@ -65,8 +65,7 @@ public class DayManager : MonoBehaviour
 		{
 			taskListManager.AddObjective("Prepare the campfire", new List<string>
 			{
-				"Chop 3 wood  0/3",
-				"Put the wood on the fire"
+				"Chop 1 wood  0/1",
 			});
 		}
 		else if (currentDay == 2)

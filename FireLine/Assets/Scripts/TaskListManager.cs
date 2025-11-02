@@ -11,11 +11,6 @@ public class TaskListManager : MonoBehaviour
 
 	private List<GameObject> activeObjectives = new List<GameObject>();
 
-	void Start()
-	{
-		AddObjective("Prepare the campfire", new List<string> { "Chop 3 wood  0/3", "Put the wood on the fire" });
-		AddObjective("Check the watchtower", new List<string> { "Climb the tower", "Look for smoke" });
-	}
 
 	public void AddObjective(string title, List<string> subtasks)
 	{
@@ -100,4 +95,18 @@ public class TaskListManager : MonoBehaviour
 		activeObjectives.Clear();
 		Debug.Log("All tasks cleared");
 	}
+
+	public void UpdateWoodProgress(int woodChoppedCount)
+	{
+		SubtaskUI[] allSubtasks = objectiveListParent.GetComponentsInChildren<SubtaskUI>();
+
+		foreach (SubtaskUI subtask in allSubtasks)
+		{
+			if (subtask.GetTaskText().Contains("Chop"))
+			{
+				subtask.UpdateProgress(woodChoppedCount);
+			}
+		}
+	}
+
 }
