@@ -21,6 +21,11 @@ public class ChoppableTree : MonoBehaviour
 	{
 		// Get TaskListManager reference
 		TaskListManager taskManager = Object.FindFirstObjectByType<TaskListManager>();
+		TutorialManager tutorial = Object.FindFirstObjectByType<TutorialManager>();
+		if (tutorial != null)
+		{
+			tutorial.OnTreeChopped();
+		}
 
 		// Spawn the chopped version
 		Vector3 spawnPos = transform.position;

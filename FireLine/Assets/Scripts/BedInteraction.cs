@@ -7,16 +7,22 @@ public class BedInteraction : MonoBehaviour
 	[SerializeField] private Canvas interactionPromptUI;
 	private bool isPlayerNearby = false;
 	private SphereCollider triggerCollider;
+	private TaskListManager taskListManager;
 
 	void Start()
 	{
 		interactionPromptUI.gameObject.SetActive(false);
 
 		triggerCollider = GetComponent<SphereCollider>();
-		if (triggerCollider == null)
+		if(!DayManager.Instance.taskListManager.AreAllTasksComplete())
 		{
-			triggerCollider = gameObject.AddComponent<SphereCollider>();
+			interactionPromptUI.gameObject.SetActive(false);
+			if (triggerCollider == null)
+			{
+				triggerCollider = gameObject.AddComponent<SphereCollider>();
+			}
 		}
+		
 
 		triggerCollider.radius = interactionRange;
 		triggerCollider.isTrigger = true;
@@ -24,10 +30,14 @@ public class BedInteraction : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.CompareTag("Player"))
-		{
-			isPlayerNearby = true;
-			interactionPromptUI.gameObject.SetActive(true);
+		if (DayManager.Instance.taskListManager.AreAllTasksComplete())
+		{ 
+
+			if (other.CompareTag("Player"))
+			{
+				isPlayerNearby = true;
+				interactionPromptUI.gameObject.SetActive(true);
+			}
 		}
 	}
 
@@ -42,10 +52,14 @@ public class BedInteraction : MonoBehaviour
 
 	void Update()
 	{
-		if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
+		if (!DayManager.Instance.taskListManager.AreAllTasksComplete())
 		{
-			Sleep();
+			if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
+			{
+				Sleep();
+			}
 		}
+			
 	}
 
 	private void Sleep()

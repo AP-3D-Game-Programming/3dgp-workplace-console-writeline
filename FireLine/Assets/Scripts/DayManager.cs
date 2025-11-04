@@ -11,6 +11,8 @@ public class DayManager : MonoBehaviour
 	private bool hasCompletedDailyTasks = false;
 	private bool canSleep = false;
 
+	private TutorialManager tutorialManager;
+
 	void Awake()
 	{
 		if (Instance != null && Instance != this)
@@ -25,6 +27,9 @@ public class DayManager : MonoBehaviour
 	{
 		if (sun == null)
 			sun = Object.FindFirstObjectByType<Light>();
+
+		// Find the TutorialManager in the scene (set it up in the scene first)
+		tutorialManager = Object.FindFirstObjectByType<TutorialManager>();
 
 		StartNewDay();
 	}
@@ -63,10 +68,19 @@ public class DayManager : MonoBehaviour
 	{
 		if (currentDay == 1)
 		{
-			taskListManager.AddObjective("Prepare the campfire", new List<string>
+			if (tutorialManager != null)
+			{
+				// Start interactive tutorial for Day 1 instead of normal tasks
+				tutorialManager.StartTutorial();
+			}
+			else
+			{
+				// fallback normal objectives if tutorial missing
+				taskListManager.AddObjective("Prepare the campfire", new List<string>
 			{
 				"Chop 1 wood  0/1",
 			});
+			}
 		}
 		else if (currentDay == 2)
 		{
@@ -79,7 +93,7 @@ public class DayManager : MonoBehaviour
 			{
 				"Chop 5 wood  0/5"
 			});
-		}
+			}
 		else
 		{
 			taskListManager.AddObjective("Patrol the forest", new List<string>

@@ -22,10 +22,11 @@ public class TaskListManager : MonoBehaviour
 		titleText.text = title.ToUpper();
 
 		SubtaskUI[] existingSubtasks = subtaskList.GetComponentsInChildren<SubtaskUI>();
-		if (existingSubtasks.Length > 0)
+		if (subtasks.Count > 0 && existingSubtasks.Length > 0)
 		{
 			ParseAndSetup(existingSubtasks[0], subtasks[0]);
 		}
+
 
 		for (int i = 1; i < subtasks.Count; i++)
 		{
@@ -108,5 +109,15 @@ public class TaskListManager : MonoBehaviour
 			}
 		}
 	}
+
+	public SubtaskUI AddSubtask(string subtaskText)
+	{
+		GameObject subtask = Instantiate(subtaskItemPrefab, objectiveListParent, false);
+		SubtaskUI subtaskUI = subtask.GetComponent<SubtaskUI>();
+		subtaskUI.Setup(subtaskText);
+		activeObjectives.Add(subtask); // Add subtask alone or manage separately
+		return subtaskUI;
+	}
+
 
 }
