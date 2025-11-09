@@ -11,9 +11,8 @@ public class PlayerControllerHaitam : MonoBehaviour
     public float jumpHeight = 2f;
     public float gravity = -9.81f;
 
-    [Header("Cameras")]
+    [Header("Camera Settings")]
     public Camera firstPersonCam;
-    public Camera thirdPersonCam;
     public Transform cameraHolder;
 
     private Transform cameraTransform;
@@ -23,7 +22,6 @@ public class PlayerControllerHaitam : MonoBehaviour
     private bool isGrounded;
     private float xRotation = 0f;
     private float yRotation = 0f;
-    private bool isFirstPerson = true;
     private bool isSprinting = false;
 
     void Start()
@@ -32,35 +30,16 @@ public class PlayerControllerHaitam : MonoBehaviour
         anim = GetComponent<Animator>();
         Cursor.lockState = CursorLockMode.Locked;
 
+        
         firstPersonCam.enabled = true;
-        thirdPersonCam.enabled = false;
         cameraTransform = firstPersonCam.transform;
     }
 
     void Update()
     {
-        HandleCameraSwitch();
         HandleMouseLook();
         HandleMovement();
         HandleAnimations();
-    }
-
-    void HandleCameraSwitch()
-    {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            isFirstPerson = !isFirstPerson;
-            firstPersonCam.enabled = isFirstPerson;
-            thirdPersonCam.enabled = !isFirstPerson;
-            cameraTransform = isFirstPerson ? firstPersonCam.transform : thirdPersonCam.transform;
-
-            
-            if (isFirstPerson)
-            {
-                yRotation = transform.eulerAngles.y;
-                transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
-            }
-        }
     }
 
     void HandleMouseLook()
@@ -72,15 +51,10 @@ public class PlayerControllerHaitam : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        
-        Quaternion targetRotation = Quaternion.Euler(xRotation, yRotation, 0f);
-        cameraHolder.rotation = Quaternion.Slerp(cameraHolder.rotation, targetRotation, Time.deltaTime * 10f);
+        cameraHolder.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         
-        if (isFirstPerson)
-        {
-            transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
-        }
+        transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 
     void HandleMovement()
@@ -88,31 +62,20 @@ public class PlayerControllerHaitam : MonoBehaviour
         bool wasGrounded = isGrounded;
         isGrounded = controller.isGrounded;
 
-        // Ground stabilisatie: gebruik kleine buffer
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
         else if (!isGrounded && wasGrounded && velocity.y <= 0)
-            velocity.y = -1f; // voorkomt dat je korte luchtmomenten als jump ziet
+            velocity.y = -1f;
 
         isSprinting = Input.GetKey(KeyCode.LeftShift);
 
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
-        Vector3 cameraForward = Vector3.ProjectOnPlane(cameraHolder.forward, Vector3.up).normalized;
-        Vector3 cameraRight = Vector3.ProjectOnPlane(cameraHolder.right, Vector3.up).normalized;
-
-        Vector3 moveDir = (cameraForward * vertical + cameraRight * horizontal).normalized;
+        Vector3 moveDir = (transform.forward * vertical + transform.right * horizontal).normalized;
 
         if (moveDir.magnitude > 0.1f)
         {
-            
-            if (!isFirstPerson)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            }
-
             float currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
             controller.Move(moveDir * currentSpeed * Time.deltaTime);
         }
