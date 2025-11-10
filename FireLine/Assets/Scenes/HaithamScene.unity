@@ -143,7 +143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BLINK.AnimationDemo
   animator: {fileID: 155197711}
   walkSpeed: 1.5
-  runSpeed: 3
+  runSpeed: 6
   turnSpeed: 2
   walkAnimationSpeedMultiplier: 1
   runAnimationSpeedMultiplier: 1
@@ -151,6 +151,13 @@ MonoBehaviour:
   movementBounds: {fileID: 2113269269}
   obstacleAvoidanceDistance: 1
   avoidanceStrength: 90
+  player: {fileID: 863627347}
+  visionDistance: 10
+  visionAngle: 120
+  attackRange: 1.5
+  attackCooldown: 2
+  knockbackDistance: 3
+  knockbackDuration: 0.2
 --- !u!1001 &286291162
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -753,6 +760,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &863627346 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 188777573539530050, guid: 348ee34245be6a842a3697530f18b6fb, type: 3}
+  m_PrefabInstance: {fileID: 7020049988839559120}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &863627347 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 708609540581629944, guid: 348ee34245be6a842a3697530f18b6fb, type: 3}
+  m_PrefabInstance: {fileID: 7020049988839559120}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &863627357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 863627346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beb835069d89fdb4f91cb3498118eebe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleKnockBack
+  knockbackDistance: 3
+  knockbackDuration: 0.2
 --- !u!1001 &1372091178
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1372,6 +1403,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CharacterV2
       objectReference: {fileID: 0}
+    - target: {fileID: 188777573539530050, guid: 348ee34245be6a842a3697530f18b6fb, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 708609540581629944, guid: 348ee34245be6a842a3697530f18b6fb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 355.18268
@@ -1423,7 +1458,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 188777573539530050, guid: 348ee34245be6a842a3697530f18b6fb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 863627357}
   m_SourcePrefab: {fileID: 100100000, guid: 348ee34245be6a842a3697530f18b6fb, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
