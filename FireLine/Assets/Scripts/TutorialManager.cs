@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class TutorialManager : MonoBehaviour
 {
 	public GameObject tutorialTree;        // Assign the "TutorialTree" GameObject in Inspector
+	public GameObject bed;
 	private Outline tutorialTreeOutline;
 
 	private int step = 0;
@@ -15,6 +16,7 @@ public class TutorialManager : MonoBehaviour
 
 	private List<SubtaskUI> moveSubtasks = new List<SubtaskUI>();
 	private List<SubtaskUI> axeSubtasks = new List<SubtaskUI>();
+	private List<SubtaskUI> sleepSubtasks = new List<SubtaskUI>();
 
 	void Start()
 	{
@@ -22,10 +24,22 @@ public class TutorialManager : MonoBehaviour
 		if (tutorialTree != null)
 			tutorialTreeOutline = tutorialTree.GetComponent<Outline>();
 
-		// Make sure outline is initially off
 		if (tutorialTreeOutline != null)
 			tutorialTreeOutline.enabled = false;
+
+		// DEBUG: Check if bed has outline
+		Outline bedOutline = bed.GetComponent<Outline>();
+		if (bedOutline == null)
+		{
+			Debug.LogError("Bed does NOT have an Outline component!");
+		}
+		else
+		{
+			Debug.Log("Bed outline found and disabled");
+			bedOutline.enabled = false;
+		}
 	}
+
 
 	public void StartTutorial()
 	{
@@ -62,8 +76,23 @@ public class TutorialManager : MonoBehaviour
 			{
 				axeSubtasks[0].MarkComplete();
 			}
+
+			if (axeSubtasks.TrueForAll(st => st.IsComplete()))
+			{
+				taskListManager.ClearAllTasks();
+				ShowStep(2);
+			}
 			// Wait for axe pickup and tree chop events to progress
 		}
+		if (step == 2)
+		{
+			Outline bedOutline = bed.GetComponent<Outline>();
+			if (bedOutline != null)
+				bedOutline.enabled = true;
+			else
+				Debug.LogError("Cannot enable bed outline - component not found!");
+		}
+
 	}
 
 
@@ -93,9 +122,10 @@ public class TutorialManager : MonoBehaviour
 				axeSubtasks.Add(taskListManager.AddSubtask("Find a tree to chop"));
 				break;
 			case 2:
+				taskListManager.AddObjective("Go to sleep", new List<string>());
+				sleepSubtasks.Add(taskListManager.AddSubtask("After you completed your tasks, go to the tower and sleep"));
 				break;
-			case 3:
-				break;
+
 		}
 	}
 
@@ -119,7 +149,20 @@ public class TutorialManager : MonoBehaviour
 		{
 			axeSubtasks[1].MarkComplete();
 		}
-		ShowStep(2);
+		
 	}
+
+	public void EnableSleepForTutorial()
+	{
+    // Mark all tutorial tasks as complete so player can sleep
+    DayManager.Instance.CompleteAllDailyTasks();
+	}
+
+	public bool IsTutorialAtSleepStep()
+	{
+		return step == 2;
+	}
+
+
 
 }

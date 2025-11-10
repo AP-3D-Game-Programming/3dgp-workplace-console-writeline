@@ -30,9 +30,18 @@ public class BedInteraction : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (DayManager.Instance.taskListManager.AreAllTasksComplete())
-		{ 
+		// Check if tasks are complete OR tutorial is at sleep step
+		bool canShowPrompt = DayManager.Instance.taskListManager.AreAllTasksComplete();
 
+		// If tutorial exists and is at sleep step, also allow prompt
+		TutorialManager tutorial = FindFirstObjectByType<TutorialManager>();
+		if (tutorial != null && tutorial.IsTutorialAtSleepStep())
+		{
+			canShowPrompt = true;
+		}
+
+		if (canShowPrompt)
+		{
 			if (other.CompareTag("Player"))
 			{
 				isPlayerNearby = true;
@@ -52,33 +61,33 @@ public class BedInteraction : MonoBehaviour
 
 	void Update()
 	{
-		if (!DayManager.Instance.taskListManager.AreAllTasksComplete())
+		// Same logic - allow sleep if tasks complete OR tutorial at sleep step
+		bool canSleep = DayManager.Instance.taskListManager.AreAllTasksComplete();
+
+		TutorialManager tutorial = FindFirstObjectByType<TutorialManager>();
+		if (tutorial != null && tutorial.IsTutorialAtSleepStep())
+		{
+			canSleep = true;
+		}
+
+		if (canSleep)
 		{
 			if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
 			{
 				Sleep();
 			}
 		}
-			
 	}
 
 	private void Sleep()
 	{
-		// Check if all tasks are actually complete
-		if (!DayManager.Instance.taskListManager.AreAllTasksComplete())
-		{
-			Debug.Log("You need to finish your daily tasks before sleeping!");
-			return;
-		}
-
-		// If tasks are complete, mark them as done
+		// Remove the AreAllTasksComplete check since we already checked above
 		DayManager.Instance.CompleteAllDailyTasks();
 
 		Debug.Log("Player is sleeping!");
 		interactionPromptUI.gameObject.SetActive(false);
 		isPlayerNearby = false;
 
-		// Start the fade animation and sleep sequence
 		StartCoroutine(SleepSequence());
 	}
 
