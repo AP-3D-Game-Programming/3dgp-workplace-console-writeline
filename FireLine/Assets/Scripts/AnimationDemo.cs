@@ -276,6 +276,9 @@ namespace BLINK
                 SetNewDirectionTowards(player.position);
                 StartCoroutine(SetActionCoroutine("Run Forward", runSpeed));
             }
+
+            PlayerDamageIndicator dmg = player.GetComponent<PlayerDamageIndicator>();
+            if (dmg != null) dmg.ShowDamage();
         }
     }
 }
