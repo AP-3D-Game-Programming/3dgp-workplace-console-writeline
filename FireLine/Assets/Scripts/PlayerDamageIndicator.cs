@@ -4,8 +4,8 @@ using UnityEngine.UI;
 public class PlayerDamageIndicator : MonoBehaviour
 {
     public Image damageOverlay;
-    public float flashAlpha = 0.6f;   // Hoe rood het wordt
-    public float fadeSpeed = 2f;      // Hoe snel het wegfade
+    public float flashAlpha = 0.6f;  
+    public float fadeSpeed = 2f;      
 
     private float currentAlpha = 0f;
 

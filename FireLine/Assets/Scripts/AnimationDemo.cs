@@ -12,7 +12,7 @@ namespace BLINK
         [Header("Movement Settings")]
         public float walkSpeed = 1.5f;
         public float runSpeed = 3f;
-        public float turnSpeed = 12f; // hogere waarde voor scherpere bochten
+        public float turnSpeed = 12f;
 
         [Header("Animation Settings")]
         public float walkAnimationSpeedMultiplier = 1f;
@@ -28,12 +28,17 @@ namespace BLINK
         public float obstacleAvoidanceDistance = 1f;
         public float avoidanceStrength = 90f;
 
+        [Header("Border Avoidance")]
+        public float borderLookAheadDistance = 3f;
+        public float borderAvoidanceDistance = 2f;
+        public float borderTurnSpeed = 60f;
+
         [Header("Player Detection")]
         public Transform player;
         public float visionDistance = 10f;
         public float visionAngle = 120f;
         public float attackRange = 1.5f;
-        public float attackCooldown = 2f;
+        public float attackCooldown = 0.1f;
 
         [Header("Knockback Settings")]
         public float knockbackDistance = 3f;
@@ -43,7 +48,10 @@ namespace BLINK
         private float currentSpeed = 0f;
         private Quaternion targetRotation;
         private string currentAction = "";
-        private float lastAttackTime = -999f;
+        private bool isAvoidingBorder = false;
+        private float borderAvoidanceTimer = 0f;
+        private float lastBorderAvoidanceTime = 0f;
+        private bool isInCombat = false;
 
         void Start()
         {
@@ -64,13 +72,24 @@ namespace BLINK
         {
             bool playerVisible = IsPlayerVisible();
 
-            AvoidObstacles();
+            if (borderAvoidanceTimer > 0f)
+                borderAvoidanceTimer -= Time.deltaTime;
 
-            // Scherpe draaiing
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
+            if (!playerVisible && borderAvoidanceTimer <= 0f)
+                CheckAndAvoidBorder();
+            else if (playerVisible)
+                isAvoidingBorder = false;
 
-            // Movement
-            if (currentSpeed > 0f)
+            if (borderAvoidanceTimer <= 0f)
+                AvoidObstacles();
+
+            float rotSpeed = isAvoidingBorder ? borderTurnSpeed : turnSpeed;
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotSpeed);
+
+            float angleToTarget = Quaternion.Angle(transform.rotation, targetRotation);
+            bool isStillTurning = angleToTarget > 15f;
+
+            if (currentSpeed > 0f && !(isAvoidingBorder && isStillTurning))
             {
                 moveDirection = transform.forward;
                 Vector3 newPosition = transform.position + moveDirection * currentSpeed * Time.deltaTime;
@@ -78,19 +97,36 @@ namespace BLINK
                 if (movementBounds != null)
                 {
                     Vector3 clampedPos = movementBounds.GetClampedPosition(newPosition);
+                    float distanceToBoundary = Vector3.Distance(newPosition, clampedPos);
 
-                    // Border check
-                    if (Vector3.Distance(newPosition, clampedPos) > 0.01f)
+                    if (distanceToBoundary > 0.01f)
                     {
-                        targetRotation = Quaternion.Euler(0, transform.eulerAngles.y + 180f, 0);
-                        newPosition = transform.position;
-                    }
-                }
+                        if (!isAvoidingBorder)
+                        {
+                            targetRotation = Quaternion.Euler(0, transform.eulerAngles.y + 180f, 0);
+                            isAvoidingBorder = true;
+                            borderAvoidanceTimer = 2f;
+                            lastBorderAvoidanceTime = Time.time;
 
-                transform.position = newPosition;
+                            if (showDebugInfo)
+                                Debug.Log("<color=red>EMERGENCY: At border! Turning 180°!</color>");
+                        }
+                    }
+                    else
+                        transform.position = newPosition;
+                }
+                else
+                    transform.position = newPosition;
             }
 
-            // Animatiesnelheid
+            if (isAvoidingBorder && angleToTarget < 5f)
+            {
+                isAvoidingBorder = false;
+                if (showDebugInfo)
+                    Debug.Log("<color=green>Turn complete! Resuming normal behavior.</color>");
+            }
+
+            
             if (currentAction == "WalkForward")
                 animator.speed = walkAnimationSpeedMultiplier;
             else if (currentAction == "Run Forward")
@@ -98,36 +134,75 @@ namespace BLINK
             else
                 animator.speed = 1f;
 
-            // Debug
+            
             if (showDebugInfo && Time.frameCount % 120 == 0)
             {
                 AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(0);
                 string clipName = clipInfo.Length > 0 ? clipInfo[0].clip.name : "None";
-                Debug.Log($"<color=yellow>Action: {currentAction} | Clip: {clipName} | Speed: {currentSpeed:F2}</color>");
+                Debug.Log($"<color=yellow>Action: {currentAction} | Clip: {clipName} | Speed: {currentSpeed:F2} | InCombat: {isInCombat}</color>");
             }
 
-            // Player follow / attack
-            if (playerVisible)
+            
+            if (playerVisible && !isInCombat)
             {
                 float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-                // Draai naar speler
-                SetNewDirectionTowards(player.position);
-
                 if (distanceToPlayer > attackRange)
                 {
-                    // Achtervolging
+                    SetNewDirectionTowards(player.position);
                     if (currentAction != "Run Forward")
                         StartCoroutine(SetActionCoroutine("Run Forward", runSpeed));
                 }
                 else
                 {
-                    // Aanval
-                    if (Time.time - lastAttackTime > attackCooldown)
-                    {
-                        lastAttackTime = Time.time;
-                        StartCoroutine(AttackPlayer());
-                    }
+                    StartCoroutine(AttackPlayer());
+                }
+            }
+        }
+
+        void CheckAndAvoidBorder()
+        {
+            if (movementBounds == null || currentSpeed <= 0f) return;
+
+            Vector3 currentClamped = movementBounds.GetClampedPosition(transform.position);
+            if (Vector3.Distance(transform.position, currentClamped) > 0.1f)
+            {
+                transform.position = currentClamped;
+                targetRotation = Quaternion.Euler(0, transform.eulerAngles.y + 180f, 0);
+                isAvoidingBorder = true;
+                borderAvoidanceTimer = 2f;
+                Debug.LogWarning("<color=red>Bear was outside bounds! Teleported back in.</color>");
+                return;
+            }
+
+            Vector3 lookAheadPos = transform.position + transform.forward * borderLookAheadDistance;
+            Vector3 clampedLookAhead = movementBounds.GetClampedPosition(lookAheadPos);
+            float distanceToBorder = Vector3.Distance(lookAheadPos, clampedLookAhead);
+
+            Vector3 leftDir = Quaternion.Euler(0, -30, 0) * transform.forward;
+            Vector3 leftLookAhead = transform.position + leftDir * borderLookAheadDistance;
+            Vector3 clampedLeftLookAhead = movementBounds.GetClampedPosition(leftLookAhead);
+            float leftDistanceToBorder = Vector3.Distance(leftLookAhead, clampedLeftLookAhead);
+
+            Vector3 rightDir = Quaternion.Euler(0, 30, 0) * transform.forward;
+            Vector3 rightLookAhead = transform.position + rightDir * borderLookAheadDistance;
+            Vector3 clampedRightLookAhead = movementBounds.GetClampedPosition(rightLookAhead);
+            float rightDistanceToBorder = Vector3.Distance(rightLookAhead, clampedRightLookAhead);
+
+            if (distanceToBorder > 0.1f || leftDistanceToBorder > 0.1f || rightDistanceToBorder > 0.1f)
+            {
+                float closestDistance = Mathf.Min(distanceToBorder, leftDistanceToBorder, rightDistanceToBorder);
+
+                if (closestDistance < borderAvoidanceDistance && !isAvoidingBorder)
+                {
+                    isAvoidingBorder = true;
+                    borderAvoidanceTimer = 2f;
+
+                    float turnAngle = leftDistanceToBorder < rightDistanceToBorder ? 120f : -120f;
+                    targetRotation = Quaternion.Euler(0, transform.eulerAngles.y + turnAngle, 0);
+
+                    if (showDebugInfo)
+                        Debug.Log($"<color=orange>Border detected ahead! Distance: {closestDistance:F2}m. Turning {turnAngle}°</color>");
                 }
             }
         }
@@ -137,25 +212,28 @@ namespace BLINK
             if (player == null) return false;
             Vector3 dir = player.position - transform.position;
             if (dir.magnitude > visionDistance) return false;
-
             float angle = Vector3.Angle(transform.forward, dir);
             return angle <= visionAngle * 0.5f;
         }
 
         void AvoidObstacles()
         {
-            if (currentSpeed <= 0f) return;
+            if (currentSpeed <= 0f || isAvoidingBorder) return;
 
             Ray ray = new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, obstacleAvoidanceDistance))
             {
-                if (hit.collider != null && (movementBounds == null || hit.collider != movementBounds.GetComponent<Collider>()))
+                bool isMovementBound = movementBounds != null && hit.collider == movementBounds.boundsCollider;
+                bool isPlayer = player != null && hit.collider.transform == player;
+
+                if (!isMovementBound && !isPlayer)
                 {
                     float angle = Random.value > 0.5f ? avoidanceStrength : -avoidanceStrength;
                     targetRotation = Quaternion.Euler(0, transform.eulerAngles.y + angle, 0);
+                    borderAvoidanceTimer = 1f;
 
                     if (showDebugInfo)
-                        Debug.Log($"<color=red>Obstacle detected! Rotating {angle} degrees</color>");
+                        Debug.Log($"<color=red>Obstacle '{hit.collider.name}' detected! Rotating {angle}°</color>");
                 }
             }
         }
@@ -181,7 +259,7 @@ namespace BLINK
 
             while (true)
             {
-                if (!IsPlayerVisible())
+                if (!IsPlayerVisible() && !isInCombat)
                 {
                     int choice = Random.Range(0, 10);
 
@@ -241,44 +319,90 @@ namespace BLINK
         {
             Vector3 dir = (position - transform.position).normalized;
             dir.y = 0;
-            targetRotation = Quaternion.LookRotation(dir);
+            if (dir != Vector3.zero)
+                targetRotation = Quaternion.LookRotation(dir);
         }
 
         IEnumerator AttackPlayer()
         {
-            // Draai onmiddellijk naar speler
-            SetNewDirectionTowards(player.position);
+            isInCombat = true;
 
-            // Speel attack animatie terwijl beer kan bewegen
-            StartCoroutine(SetActionCoroutine("Attack1", runSpeed));
+            if (showDebugInfo)
+                Debug.Log("<color=red>>>> ENTERING COMBAT MODE <<<</color>");
 
-            // Knockback toepassen
-            SimpleKnockBack knockback = player.GetComponent<SimpleKnockBack>();
-            if (knockback != null)
-                knockback.ApplyKnockback(transform.position);
-
-            // Korte pauze zodat animatie zichtbaar is
-            yield return new WaitForSeconds(0.2f);
-
-            // Direct terug naar achtervolging en aanval indien speler nog in vizier
-            while (IsPlayerVisible() && Vector3.Distance(transform.position, player.position) <= attackRange)
+            while (IsPlayerVisible())
             {
-                // Blijf speler raken
-                SetNewDirectionTowards(player.position);
-                yield return StartCoroutine(SetActionCoroutine("Attack1", runSpeed));
-                knockback?.ApplyKnockback(transform.position);
-                yield return new WaitForSeconds(attackCooldown);
+                float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+                if (distanceToPlayer <= attackRange)
+                {
+                    currentSpeed = 0f;
+                    SetNewDirectionTowards(player.position);
+
+                    
+                    ForceCompleteReset();
+                    currentAction = "Attack1";
+                    animator.SetBool("Attack1", true);
+
+                    if (showDebugInfo)
+                        Debug.Log("<color=red>>>> ATTACKING! <<<</color>");
+
+                    yield return new WaitForSeconds(0.1f); 
+
+                    player.GetComponent<GameOverSimple>()?.TakeHit();
+                    player.GetComponent<SimpleKnockBack>()?.ApplyKnockback(transform.position);
+                    player.GetComponent<PlayerDamageIndicator>()?.ShowDamage();
+
+                    yield return new WaitForSeconds(attackCooldown);
+                }
+                else
+                {
+                    
+                    SetNewDirectionTowards(player.position);
+
+                    currentAction = "Run Forward";
+                    currentSpeed = runSpeed;
+                    animator.SetBool("Run Forward", true);
+
+                    yield return new WaitForSeconds(0.1f);
+                }
             }
 
-            // Als speler buiten bereik: direct achtervolgen
-            if (IsPlayerVisible() && Vector3.Distance(transform.position, player.position) > attackRange)
-            {
-                SetNewDirectionTowards(player.position);
-                StartCoroutine(SetActionCoroutine("Run Forward", runSpeed));
-            }
+            
+            isInCombat = false;
+            currentSpeed = 0f;
 
-            PlayerDamageIndicator dmg = player.GetComponent<PlayerDamageIndicator>();
-            if (dmg != null) dmg.ShowDamage();
+            ForceCompleteReset();
+            currentAction = "Idle";
+            animator.SetBool("Idle", true);
+
+            if (showDebugInfo)
+                Debug.Log("<color=green>>>> EXITING COMBAT MODE <<<</color>");
+        }
+
+        void OnDrawGizmos()
+        {
+            if (movementBounds == null || !Application.isPlaying) return;
+
+            Vector3 origin = transform.position + Vector3.up * 0.5f;
+
+            Gizmos.color = isAvoidingBorder ? Color.red : Color.green;
+            Gizmos.DrawLine(origin, origin + transform.forward * borderLookAheadDistance);
+
+            Vector3 leftDir = Quaternion.Euler(0, -30, 0) * transform.forward;
+            Gizmos.DrawLine(origin, origin + leftDir * borderLookAheadDistance);
+
+            Vector3 rightDir = Quaternion.Euler(0, 30, 0) * transform.forward;
+            Gizmos.DrawLine(origin, origin + rightDir * borderLookAheadDistance);
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, borderAvoidanceDistance);
+
+            if (player != null)
+            {
+                Gizmos.color = isInCombat ? Color.red : Color.cyan;
+                Gizmos.DrawWireSphere(transform.position, attackRange);
+            }
         }
     }
 }
