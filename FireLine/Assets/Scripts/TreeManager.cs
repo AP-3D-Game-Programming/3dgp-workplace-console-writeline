@@ -16,11 +16,15 @@ public class TreeManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        amountSecOnFire = 0;
-        Burned = false;
-        deadTimer = 10;
         fireIndicator = fireIndicatorTransform.GetComponent<FireIndicator>();
         fireIndicator.OnFireStateChange += HandleFireChange;
+        
+        amountSecOnFire = 0;
+        Burned = false;
+        deadTimer = 2;
+    }
+    void Start()
+    {
     }
     void OnDestroy()
     {

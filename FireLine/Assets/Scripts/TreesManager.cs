@@ -30,9 +30,8 @@ public class TreesManager : MonoBehaviour
             
         }
 
-
         InvokeRepeating("HandleTreeSpawning", 0.5f, 0.5f);
-        InvokeRepeating("BurnRandomTree", 1f, 1f);
+        InvokeRepeating("BurnRandomTree", 0.5f, 0.5f);
     }
 
     void OnApplicationQuit()
@@ -65,6 +64,7 @@ public class TreesManager : MonoBehaviour
 
             if (Vector3.Distance(player.transform.position, tree.RealWorldPos) > 10f && !isObjectOnFire && !isObjectBurned)
             {
+                Debug.Log(isObjectBurned);
                 Destroy(tree.RealTree);
                 tree.RealTree = null;
             }
@@ -105,17 +105,27 @@ public class TreesManager : MonoBehaviour
             Destroy(treeModel.RealTree);
             treeModel.RealTree = null;
 
-
             treeModel.RealTree = Instantiate(BurnedtreePrefabs[treeModel.TreeInstance.prototypeIndex], treeModel.RealWorldPos, treeModel.RealWorldRotation);
-            treeModel.RealTree.GetComponent<TreeManager>().Burned = true;
             treeModel.setRealTreeCorrectScale();
         }
     }
     private void BurnRandomTree()
     {
         var i = -1;
-        do i = Random.Range(0, trees.Count);
-        while (trees[i].TreeInstance.prototypeIndex == 2);
+        bool isObjectOnFire;
+        bool isObjectBurned;
+        bool isObjectATree;
+        do {
+            i = Random.Range(0, trees.Count);
+
+            isObjectOnFire = trees[i].RealTree?.transform.Find("Fire Indicator")?.gameObject.active ?? false;
+            isObjectBurned = trees[i].RealTree?.transform.GetComponent<TreeManager>()?.Burned ?? false;
+            isObjectATree = trees[i].TreeInstance.prototypeIndex < 2;
+        }
+        // if RealTree does not exist = true (loop continue)
+        // if Component Not found = true (loop continue)
+        // if RealTree is Burned = true (loop continue)
+        while (isObjectOnFire ||  isObjectBurned || !isObjectATree );
 
         SpawnRealTree(trees[i]);
 
