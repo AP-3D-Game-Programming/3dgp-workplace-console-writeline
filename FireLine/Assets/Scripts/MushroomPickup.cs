@@ -2,31 +2,45 @@ using UnityEngine;
 
 public class MushroomPickup : MonoBehaviour
 {
-	private bool playerNearby = false;
-	public float pickupRange = 2f;
-	private Transform player;
+	[SerializeField] private float interactionRange = 2f;
+	private GameObject interactionPromptUI;
+	private bool isPlayerNearby = false;
+	private SphereCollider triggerCollider;
 
-	void Update()
+	void Start()
 	{
-		if (playerNearby && Input.GetKeyDown(KeyCode.E))
+		Canvas canvas = GetComponentInChildren<Canvas>();
+		if (canvas != null)
 		{
-			CollectMushroom();
+			interactionPromptUI = canvas.gameObject;
+			interactionPromptUI.SetActive(false);
+			Debug.Log("Canvas found and hidden!"); // Debug
 		}
-	}
+		else
+		{
+			Debug.LogError("No Canvas found as child!"); // Debug
+		}
 
-	void CollectMushroom()
-	{
-		TaskListManager.Instance?.UpdateMushroomProgress();
-		Debug.Log("Mushroom collected!");
-		Destroy(gameObject);
+		triggerCollider = GetComponent<SphereCollider>();
+		if (triggerCollider == null)
+		{
+			triggerCollider = gameObject.AddComponent<SphereCollider>();
+		}
+
+		triggerCollider.radius = interactionRange;
+		triggerCollider.isTrigger = true;
 	}
 
 	void OnTriggerEnter(Collider other)
 	{
 		if (other.CompareTag("Player"))
 		{
-			playerNearby = true;
-			player = other.transform;
+			isPlayerNearby = true;
+			if (interactionPromptUI != null)
+			{
+				interactionPromptUI.SetActive(true); // Remove .gameObject - it's already a GameObject
+				Debug.Log("Showing canvas!"); // Debug
+			}
 		}
 	}
 
@@ -34,8 +48,38 @@ public class MushroomPickup : MonoBehaviour
 	{
 		if (other.CompareTag("Player"))
 		{
-			playerNearby = false;
-			player = null;
+			isPlayerNearby = false;
+			if (interactionPromptUI != null)
+			{
+				interactionPromptUI.SetActive(false); // Remove .gameObject
+			}
 		}
+	}
+
+	void Update()
+	{
+		if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
+		{
+			CollectMushroom();
+		}
+	}
+
+	private void CollectMushroom()
+	{
+		// Update task progress
+		if (TaskListManager.Instance != null)
+		{
+			TaskListManager.Instance.UpdateMushroomProgress();
+		}
+
+		Debug.Log("Mushroom collected!");
+
+		// Hide UI before destroying
+		if (interactionPromptUI != null)
+		{
+			interactionPromptUI.SetActive(false); // Remove .gameObject
+		}
+
+		Destroy(gameObject);
 	}
 }
