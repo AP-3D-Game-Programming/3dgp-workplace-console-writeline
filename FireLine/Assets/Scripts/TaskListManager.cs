@@ -8,8 +8,9 @@ public class TaskListManager : MonoBehaviour
 	[SerializeField] private GameObject taskContainerPrefab;
 	[SerializeField] private Transform objectiveListParent;
 	[SerializeField] private GameObject subtaskItemPrefab;
-
+	public static TaskListManager Instance { get; private set; }
 	private List<GameObject> activeObjectives = new List<GameObject>();
+	private GameObject lastAddedObjective;
 
 	public void AddObjective(string title, List<string> subtasks)
 	{
@@ -33,6 +34,9 @@ public class TaskListManager : MonoBehaviour
 		}
 
 		activeObjectives.Add(taskContainer);
+
+		// Store reference to last added objective
+		lastAddedObjective = taskContainer;
 	}
 
 	private void ParseAndSetup(SubtaskUI subtaskUI, string taskText)
@@ -52,6 +56,16 @@ public class TaskListManager : MonoBehaviour
 		{
 			subtaskUI.Setup(taskText);
 		}
+	}
+
+	void Awake()
+	{
+		if (Instance != null && Instance != this)
+		{
+			Destroy(gameObject);
+			return;
+		}
+		Instance = this;
 	}
 
 	public void RemoveObjective(int index)
@@ -132,4 +146,60 @@ public class TaskListManager : MonoBehaviour
 		activeObjectives.Add(subtask);
 		return subtaskUI;
 	}
+
+	private SubtaskUI mushroomSubtask; // Track the mushroom subtask
+	private int mushroomsCollected = 0;
+
+	public void UpdateMushroomProgress()
+	{
+		mushroomsCollected++;
+
+		if (mushroomSubtask != null)
+		{
+			mushroomSubtask.UpdateProgress(mushroomsCollected);
+
+			// Check if all tasks complete
+			if (AreAllTasksComplete())
+			{
+				DayManager.Instance.CompleteAllDailyTasks();
+			}
+		}
+	}
+
+	// Call this when creating the mushroom task in AddObjective
+	public void SetMushroomSubtask(SubtaskUI subtask)
+	{
+		mushroomSubtask = subtask;
+		mushroomsCollected = 0; // Reset counter for new day
+	}
+
+	
+
+	// New method: Get the last added objective GameObject
+	public GameObject GetLastAddedObjective()
+	{
+		return lastAddedObjective;
+	}
+
+	// New method: Get a specific subtask from the last added objective
+	public SubtaskUI GetLastAddedSubtask(int subtaskIndex = 0)
+	{
+		if (lastAddedObjective == null)
+		{
+			Debug.LogWarning("No objective has been added yet!");
+			return null;
+		}
+
+		Transform subtaskList = lastAddedObjective.transform.Find("SubtaskList");
+
+		if (subtaskList != null && subtaskList.childCount > subtaskIndex)
+		{
+			return subtaskList.GetChild(subtaskIndex).GetComponent<SubtaskUI>();
+		}
+
+		Debug.LogWarning($"Subtask index {subtaskIndex} not found in last objective!");
+		return null;
+	}
+
+
 }

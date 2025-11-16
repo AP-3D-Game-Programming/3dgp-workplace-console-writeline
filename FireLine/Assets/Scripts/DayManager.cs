@@ -9,7 +9,7 @@ public class DayManager : MonoBehaviour
 	[SerializeField] public TaskListManager taskListManager;
 	[SerializeField] private Light sun;
 	[SerializeField] private TreeSpawner treeSpawner; // Add reference to TreeSpawner
-
+	[SerializeField] private MushroomSpawnManager mushroomSpawner;
 	private bool hasCompletedDailyTasks = false;
 	private bool canSleep = false;
 
@@ -108,6 +108,13 @@ public class DayManager : MonoBehaviour
 				Debug.Log("Spawned trees for Day 2 wood gathering task.");
 			}
 		}
+		else if (currentDay == 3)
+		{
+			taskListManager.AddObjective("Mushroom soup", new List<string>
+			{
+				"Pick up 10 mushrooms 0/10"
+			});
+		}
 		else
 		{
 			// When no tasks are there: Infinite scaling tree chopping
@@ -164,4 +171,6 @@ public class DayManager : MonoBehaviour
 	{
 		return canSleep;
 	}
+
+	
 }
