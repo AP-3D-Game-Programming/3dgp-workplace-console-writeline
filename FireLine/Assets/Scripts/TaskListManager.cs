@@ -11,7 +11,6 @@ public class TaskListManager : MonoBehaviour
 
 	private List<GameObject> activeObjectives = new List<GameObject>();
 
-
 	public void AddObjective(string title, List<string> subtasks)
 	{
 		GameObject taskContainer = Instantiate(taskContainerPrefab, objectiveListParent, false);
@@ -26,7 +25,6 @@ public class TaskListManager : MonoBehaviour
 		{
 			ParseAndSetup(existingSubtasks[0], subtasks[0]);
 		}
-
 
 		for (int i = 1; i < subtasks.Count; i++)
 		{
@@ -74,16 +72,13 @@ public class TaskListManager : MonoBehaviour
 		}
 	}
 
-	// Check if ALL subtasks are complete
 	public bool AreAllTasksComplete()
 	{
 		SubtaskUI[] allSubtasks = objectiveListParent.GetComponentsInChildren<SubtaskUI>();
 
-		// If no tasks exist, return false
 		if (allSubtasks.Length == 0)
 			return false;
 
-		// All tasks must be complete
 		return allSubtasks.All(task => task.IsComplete());
 	}
 
@@ -97,16 +92,35 @@ public class TaskListManager : MonoBehaviour
 		Debug.Log("All tasks cleared");
 	}
 
-	public void UpdateWoodProgress(int woodChoppedCount)
+	public void UpdateWoodProgress(int currentWoodCount)
 	{
-		SubtaskUI[] allSubtasks = objectiveListParent.GetComponentsInChildren<SubtaskUI>();
-
-		foreach (SubtaskUI subtask in allSubtasks)
+		foreach (GameObject objective in activeObjectives)
 		{
-			if (subtask.GetTaskText().Contains("Chop"))
+			SubtaskUI[] subtasks = objective.GetComponentsInChildren<SubtaskUI>();
+			foreach (SubtaskUI subtask in subtasks)
 			{
-				subtask.UpdateProgress(woodChoppedCount);
+				string taskText = subtask.GetTaskText();
+
+				// Check if this is a wood chopping task
+				if (taskText.Contains("Chop") && taskText.Contains("trees"))
+				{
+					subtask.UpdateProgress(currentWoodCount);
+
+					// Check if task is complete and notify DayManager
+					CheckAllTasksComplete();
+					return;
+				}
 			}
+		}
+	}
+
+	// Check if all tasks complete and notify DayManager
+	private void CheckAllTasksComplete()
+	{
+		if (AreAllTasksComplete())
+		{
+			Debug.Log("All tasks completed!");
+			DayManager.Instance.CompleteAllDailyTasks();
 		}
 	}
 
@@ -115,9 +129,7 @@ public class TaskListManager : MonoBehaviour
 		GameObject subtask = Instantiate(subtaskItemPrefab, objectiveListParent, false);
 		SubtaskUI subtaskUI = subtask.GetComponent<SubtaskUI>();
 		subtaskUI.Setup(subtaskText);
-		activeObjectives.Add(subtask); // Add subtask alone or manage separately
+		activeObjectives.Add(subtask);
 		return subtaskUI;
 	}
-
-
 }

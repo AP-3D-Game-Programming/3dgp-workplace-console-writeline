@@ -7,11 +7,18 @@ public class DayManager : MonoBehaviour
 
 	[SerializeField] private int currentDay = 1;
 	[SerializeField] public TaskListManager taskListManager;
-	[SerializeField] private Light sun; // Add this
+	[SerializeField] private Light sun;
+	[SerializeField] private TreeSpawner treeSpawner; // Add reference to TreeSpawner
+
 	private bool hasCompletedDailyTasks = false;
 	private bool canSleep = false;
 
 	private TutorialManager tutorialManager;
+
+	[Header("Progression Settings")]
+	[SerializeField] private int startingTreeCount = 5; // Trees required on Day 2
+	[SerializeField] private int treeIncreasePerDay = 3; // How many more trees each day
+
 
 	void Awake()
 	{
@@ -26,10 +33,10 @@ public class DayManager : MonoBehaviour
 	void Start()
 	{
 		if (sun == null)
-			sun = Object.FindFirstObjectByType<Light>();
+			sun = FindObjectOfType<Light>();
 
-		// Find the TutorialManager in the scene (set it up in the scene first)
-		tutorialManager = Object.FindFirstObjectByType<TutorialManager>();
+		// Find the TutorialManager in the scene
+		tutorialManager = FindObjectOfType<TutorialManager>();
 
 		StartNewDay();
 	}
@@ -56,13 +63,18 @@ public class DayManager : MonoBehaviour
 
 		Debug.Log("Day " + currentDay + " started!");
 
+		// Reset wood count for new day
+		ChoppableTree.ResetWoodCount();
+
 		taskListManager.ClearAllTasks();
 		GenerateDailyTasks();
 
 		// Reset the day/night cycle and sun position
 		TimeManager.Instance.ResetDay();
-		sun.transform.rotation = Quaternion.Euler(0, 0, 0); // Reset sun to sunrise (0 degrees)
+		sun.transform.rotation = Quaternion.Euler(0, 0, 0);
 	}
+
+
 
 	private void GenerateDailyTasks()
 	{
@@ -70,38 +82,57 @@ public class DayManager : MonoBehaviour
 		{
 			if (tutorialManager != null)
 			{
-				// Start interactive tutorial for Day 1 instead of normal tasks
+				// Start interactive tutorial for Day 1
 				tutorialManager.StartTutorial();
 			}
 			else
 			{
-				// fallback normal objectives if tutorial missing
+				// Fallback normal objectives if tutorial missing
 				taskListManager.AddObjective("Prepare the campfire", new List<string>
-			{
-				"Chop 1 wood  0/1",
-			});
+				{
+					"Chop 1 wood  0/1",
+				});
 			}
 		}
 		else if (currentDay == 2)
 		{
-			taskListManager.AddObjective("Check the watchtower", new List<string>
+			taskListManager.AddObjective("Gather wood for winter", new List<string>
 			{
-				"Climb the tower",
-				"Look for smoke"
+				"Chop 5 trees  0/5"
 			});
-			taskListManager.AddObjective("Prepare the campfire", new List<string>
+
+			// Spawn 5 trees for the player to chop
+			if (treeSpawner != null)
 			{
-				"Chop 5 wood  0/5"
-			});
+				treeSpawner.SpawnTrees();
+				Debug.Log("Spawned trees for Day 2 wood gathering task.");
 			}
+		}
 		else
 		{
-			taskListManager.AddObjective("Patrol the forest", new List<string>
+			// When no tasks are there: Infinite scaling tree chopping
+			int treesToChop = CalculateTreesForDay(currentDay);
+
+			taskListManager.AddObjective("Gather wood for winter", new List<string>
+		{
+			$"Chop {treesToChop} trees  0/{treesToChop}"
+		});
+
+			// Spawn the required number of trees
+			if (treeSpawner != null)
 			{
-				"Check north area",
-				"Check south area"
-			});
+				treeSpawner.SetTreeCount(treesToChop);
+				treeSpawner.SpawnTrees();
+				Debug.Log($"Day {currentDay}: Spawned {treesToChop} trees.");
+			}
 		}
+
+	}
+
+	private int CalculateTreesForDay(int day)
+	{
+		// Day 2 = 5 trees, Day 3 = 8 trees, Day 4 = 11 trees, etc.
+		return startingTreeCount + ((day - 2) * treeIncreasePerDay);
 	}
 
 	public void CompleteAllDailyTasks()

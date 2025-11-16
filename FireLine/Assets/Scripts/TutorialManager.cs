@@ -5,9 +5,10 @@ using UnityEngine.UI;
 
 public class TutorialManager : MonoBehaviour
 {
-	public GameObject tutorialTree;        // Assign the "TutorialTree" GameObject in Inspector
+	public GameObject tutorialTree;
 	public GameObject bed;
 	private Outline tutorialTreeOutline;
+	private bool tutorialCompleted = false;
 
 	private int step = 0;
 
@@ -20,14 +21,18 @@ public class TutorialManager : MonoBehaviour
 
 	void Start()
 	{
-		ShowStep(0);
+		// Only show tutorial on Day 1
+		if (DayManager.Instance.GetCurrentDay() == 1)
+		{
+			ShowStep(0);
+		}
+
 		if (tutorialTree != null)
 			tutorialTreeOutline = tutorialTree.GetComponent<Outline>();
 
 		if (tutorialTreeOutline != null)
 			tutorialTreeOutline.enabled = false;
 
-		// DEBUG: Check if bed has outline
 		Outline bedOutline = bed.GetComponent<Outline>();
 		if (bedOutline == null)
 		{
@@ -40,16 +45,22 @@ public class TutorialManager : MonoBehaviour
 		}
 	}
 
-
 	public void StartTutorial()
 	{
-		// Show tutorial UI and steps here
-		gameObject.SetActive(true);
-		ShowStep(0); // Start from step 0
+		// Only start tutorial on Day 1 and if not completed
+		if (DayManager.Instance.GetCurrentDay() == 1 && !tutorialCompleted)
+		{
+			gameObject.SetActive(true);
+			ShowStep(0);
+		}
 	}
 
 	private void Update()
 	{
+		// Skip all tutorial logic if not Day 1 or tutorial is completed
+		if (DayManager.Instance.GetCurrentDay() != 1 || tutorialCompleted)
+			return;
+
 		if (step == 0)
 		{
 			if (Input.GetKeyDown(KeyCode.W))
@@ -63,14 +74,13 @@ public class TutorialManager : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.Space))
 				moveSubtasks[4].MarkComplete();
 
-			// If all move subtasks complete, progress to next step
 			if (moveSubtasks.TrueForAll(st => st.IsComplete()))
 			{
 				taskListManager.ClearAllTasks();
 				ShowStep(1);
 			}
 		}
-		if (step == 1)
+		else if (step == 1)
 		{
 			if (inventoryManager.GetCurrentTool() != null && inventoryManager.GetCurrentTool().toolName == "Axe")
 			{
@@ -82,21 +92,14 @@ public class TutorialManager : MonoBehaviour
 				taskListManager.ClearAllTasks();
 				ShowStep(2);
 			}
-			// Wait for axe pickup and tree chop events to progress
 		}
-		if (step == 2)
+		else if (step == 2)
 		{
 			Outline bedOutline = bed.GetComponent<Outline>();
-			if (bedOutline != null)
+			if (bedOutline != null && !bedOutline.enabled)
 				bedOutline.enabled = true;
-			else
-				Debug.LogError("Cannot enable bed outline - component not found!");
 		}
-
 	}
-
-
-
 
 	void ShowStep(int stepIndex)
 	{
@@ -105,8 +108,6 @@ public class TutorialManager : MonoBehaviour
 		{
 			case 0:
 				taskListManager.AddObjective("Move using WASD keys.", new List<string>());
-
-				// Manually create each subtask UI so you can track them
 				moveSubtasks.Clear();
 				moveSubtasks.Add(taskListManager.AddSubtask("Press W to move forward"));
 				moveSubtasks.Add(taskListManager.AddSubtask("Press A to move left"));
@@ -121,15 +122,14 @@ public class TutorialManager : MonoBehaviour
 				HighlightTree(true);
 				axeSubtasks.Add(taskListManager.AddSubtask("Find a tree to chop"));
 				break;
+
 			case 2:
 				taskListManager.AddObjective("Go to sleep", new List<string>());
 				sleepSubtasks.Add(taskListManager.AddSubtask("After you completed your tasks, go to the tower and sleep"));
 				break;
-
 		}
 	}
 
-	// Call this from your axe pickup code
 	public void OnAxePickedUp()
 	{
 		ShowStep(1);
@@ -141,28 +141,32 @@ public class TutorialManager : MonoBehaviour
 			tutorialTreeOutline.enabled = highlight;
 	}
 
-
-	// Call this when the tree is chopped
 	public void OnTreeChopped()
 	{
-		if (axeSubtasks.Count > 1) // Assuming second subtask is chop tree
+		if (axeSubtasks.Count > 1)
 		{
 			axeSubtasks[1].MarkComplete();
 		}
-		
-	}
-
-	public void EnableSleepForTutorial()
-	{
-    // Mark all tutorial tasks as complete so player can sleep
-    DayManager.Instance.CompleteAllDailyTasks();
 	}
 
 	public bool IsTutorialAtSleepStep()
 	{
-		return step == 2;
+		return DayManager.Instance.GetCurrentDay() == 1 && step == 2 && !tutorialCompleted;
 	}
 
+	public void OnPlayerReachedBed()
+	{
+		// Only execute on Day 1, step 2, and if not already completed
+		if (DayManager.Instance.GetCurrentDay() == 1 && step == 2 && sleepSubtasks.Count > 0 && !tutorialCompleted)
+		{
+			sleepSubtasks[0].MarkComplete();
+			DayManager.Instance.CompleteAllDailyTasks();
+			tutorialCompleted = true;
 
-
+			// Disable bed outline after tutorial
+			Outline bedOutline = bed.GetComponent<Outline>();
+			if (bedOutline != null)
+				bedOutline.enabled = false;
+		}
+	}
 }

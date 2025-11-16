@@ -7,22 +7,16 @@ public class BedInteraction : MonoBehaviour
 	[SerializeField] private Canvas interactionPromptUI;
 	private bool isPlayerNearby = false;
 	private SphereCollider triggerCollider;
-	private TaskListManager taskListManager;
 
 	void Start()
 	{
 		interactionPromptUI.gameObject.SetActive(false);
 
 		triggerCollider = GetComponent<SphereCollider>();
-		if(!DayManager.Instance.taskListManager.AreAllTasksComplete())
+		if (triggerCollider == null)
 		{
-			interactionPromptUI.gameObject.SetActive(false);
-			if (triggerCollider == null)
-			{
-				triggerCollider = gameObject.AddComponent<SphereCollider>();
-			}
+			triggerCollider = gameObject.AddComponent<SphereCollider>();
 		}
-		
 
 		triggerCollider.radius = interactionRange;
 		triggerCollider.isTrigger = true;
@@ -30,25 +24,20 @@ public class BedInteraction : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		// Check if tasks are complete OR tutorial is at sleep step
-		bool canShowPrompt = DayManager.Instance.taskListManager.AreAllTasksComplete();
-
-		// If tutorial exists and is at sleep step, also allow prompt
-		TutorialManager tutorial = FindFirstObjectByType<TutorialManager>();
-		if (tutorial != null && tutorial.IsTutorialAtSleepStep())
+		if (other.CompareTag("Player"))
 		{
-			canShowPrompt = true;
-		}
+			isPlayerNearby = true;
+			interactionPromptUI.gameObject.SetActive(true);
 
-		if (canShowPrompt)
-		{
-			if (other.CompareTag("Player"))
+			// Only trigger tutorial bed logic on Day 1 AND if tutorial exists and is active
+			TutorialManager tutorial = FindObjectOfType<TutorialManager>();
+			if (tutorial != null && DayManager.Instance.GetCurrentDay() == 1 && tutorial.IsTutorialAtSleepStep())
 			{
-				isPlayerNearby = true;
-				interactionPromptUI.gameObject.SetActive(true);
+				tutorial.OnPlayerReachedBed();
 			}
 		}
 	}
+ 
 
 	void OnTriggerExit(Collider other)
 	{
@@ -61,33 +50,26 @@ public class BedInteraction : MonoBehaviour
 
 	void Update()
 	{
-		// Same logic - allow sleep if tasks complete OR tutorial at sleep step
-		bool canSleep = DayManager.Instance.taskListManager.AreAllTasksComplete();
-
-		TutorialManager tutorial = FindFirstObjectByType<TutorialManager>();
-		if (tutorial != null && tutorial.IsTutorialAtSleepStep())
+		if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
 		{
-			canSleep = true;
-		}
-
-		if (canSleep)
-		{
-			if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
-			{
-				Sleep();
-			}
+			Sleep();
 		}
 	}
 
 	private void Sleep()
 	{
-		// Remove the AreAllTasksComplete check since we already checked above
-		DayManager.Instance.CompleteAllDailyTasks();
+		// Check if player can sleep (all tasks must be complete)
+		if (!DayManager.Instance.CanSleep())
+		{
+			Debug.Log("You need to finish your daily tasks before sleeping!");
+			return;
+		}
 
 		Debug.Log("Player is sleeping!");
 		interactionPromptUI.gameObject.SetActive(false);
 		isPlayerNearby = false;
 
+		// Start the fade animation and sleep sequence
 		StartCoroutine(SleepSequence());
 	}
 
@@ -99,4 +81,6 @@ public class BedInteraction : MonoBehaviour
 			DayManager.Instance.ProgressToNextDay();
 		}));
 	}
+
+
 }

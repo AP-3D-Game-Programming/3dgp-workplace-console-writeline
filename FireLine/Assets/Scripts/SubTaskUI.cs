@@ -62,20 +62,44 @@ public class SubtaskUI : MonoBehaviour
 	{
 		if (subtaskText != null)
 		{
-			// Extract the total from the text
-			string[] parts = subtaskText.text.Split('/');
-			if (parts.Length > 1)
-			{
-				int total = int.Parse(parts[1]);
-				subtaskText.text = $"Chop {currentValue} wood  {currentValue}/{total}";
+			// Parse the current task text to extract the total
+			string text = subtaskText.text;
 
-				if (currentValue >= total)
+			// Look for pattern like "0/5" or "1/5"
+			if (text.Contains("/"))
+			{
+				int slashIndex = text.LastIndexOf('/');
+				int spaceBeforeSlash = text.LastIndexOf(' ', slashIndex);
+
+				if (spaceBeforeSlash >= 0 && slashIndex > spaceBeforeSlash)
 				{
-					MarkComplete();
+					// Extract total value after the slash
+					string afterSlash = text.Substring(slashIndex + 1).Trim();
+					int total;
+
+					// Parse just the number (ignore any text after it)
+					string[] parts = afterSlash.Split(' ');
+					if (int.TryParse(parts[0], out total))
+					{
+						// Update the progress
+						current = currentValue;
+						this.total = total;
+
+						// Rebuild the text with updated progress
+						string beforeProgress = text.Substring(0, spaceBeforeSlash + 1);
+						subtaskText.text = $"{beforeProgress}{current}/{total}";
+
+						// Auto-complete when progress reaches total
+						if (current >= total)
+						{
+							MarkComplete();
+						}
+					}
 				}
 			}
 		}
 	}
+
 
 	public string GetTaskText()
 	{

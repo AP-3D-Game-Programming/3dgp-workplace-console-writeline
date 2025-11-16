@@ -1,10 +1,14 @@
 using UnityEngine;
+using System;
 
 public class ChoppableTree : MonoBehaviour
 {
-	public GameObject choppedTreePrefab; // Assign your top + stump prefab here
+	public static event Action OnAnyTreeChopped;
+	public static int totalWoodChopped = 0; // Track total wood across all trees
+
+	public GameObject choppedTreePrefab;
 	private int chopCount = 0;
-	private int chopsNeeded = 3; // How many hits to chop it down
+	private int chopsNeeded = 3;
 
 	public void TakeChop()
 	{
@@ -19,9 +23,8 @@ public class ChoppableTree : MonoBehaviour
 
 	void ChopTree()
 	{
-		// Get TaskListManager reference
-		TaskListManager taskManager = Object.FindFirstObjectByType<TaskListManager>();
-		TutorialManager tutorial = Object.FindFirstObjectByType<TutorialManager>();
+		// Notify tutorial if active
+		TutorialManager tutorial = FindObjectOfType<TutorialManager>();
 		if (tutorial != null)
 		{
 			tutorial.OnTreeChopped();
@@ -32,15 +35,26 @@ public class ChoppableTree : MonoBehaviour
 		spawnPos.y += 0.5f;
 		Instantiate(choppedTreePrefab, spawnPos, transform.rotation);
 
-		// Update task
+		// Increment total wood count
+		totalWoodChopped++;
+
+		// Trigger the static event
+		OnAnyTreeChopped?.Invoke();
+
+		// Update task progress with TOTAL wood count
+		TaskListManager taskManager = FindObjectOfType<TaskListManager>();
 		if (taskManager != null)
 		{
-			taskManager.UpdateWoodProgress(1);
+			taskManager.UpdateWoodProgress(totalWoodChopped);
 		}
 
 		// Destroy the intact tree
 		Destroy(gameObject);
 	}
 
-
+	// Reset wood count at start of new day
+	public static void ResetWoodCount()
+	{
+		totalWoodChopped = 0;
+	}
 }
