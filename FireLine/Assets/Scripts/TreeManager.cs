@@ -72,9 +72,11 @@ public class TreeManager : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("waterCollider"))
         {
-            fireIndicatorTransform.gameObject.SetActive(false);
-            if (dayManager.GetCurrentDay() == 1)
+            if (fireIndicatorTransform.gameObject.activeSelf)
+            {
                 tutorialManager.waterBucketSubtask.UpdateProgress();
+            }
+            fireIndicatorTransform.gameObject.SetActive(false);   
         }
     }
 }
