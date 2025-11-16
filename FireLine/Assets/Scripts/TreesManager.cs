@@ -117,7 +117,7 @@ public class TreesManager : MonoBehaviour
         
         var nearByTrees =  trees.Where(t =>
         {
-            var isObjectNearBy = Vector3.Distance(player.transform.position, t.RealWorldPos) <= 100f;
+            var isObjectNearBy = Vector3.Distance(player.transform.position, t.RealWorldPos) <= 50f;
             var isObjectOnFire = t.RealTree?.transform.Find("Fire Indicator")?.gameObject.active ?? false;
             var isObjectBurned = t.RealTree?.transform.GetComponent<TreeManager>()?.Burned ?? false;
             var isObjectATree = t.TreeInstance.prototypeIndex < 2;

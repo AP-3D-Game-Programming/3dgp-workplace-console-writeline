@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
 
 public class SubtaskUI : MonoBehaviour
 {
@@ -100,7 +101,10 @@ public class SubtaskUI : MonoBehaviour
 		}
 	}
 
-
+	public void UpdateProgress()
+    {
+       UpdateProgress(++current); 
+    } 	
 	public string GetTaskText()
 	{
 		return subtaskText != null ? subtaskText.text : "";

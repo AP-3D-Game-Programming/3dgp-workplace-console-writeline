@@ -11,7 +11,7 @@ public class TreeManager : MonoBehaviour
     public bool Burned;
     
     private int deadTimer;
-
+    private TutorialManager tutorialManager;
 
     public event Action<TreeManager> OnBurnedStateChange;
     
@@ -27,6 +27,7 @@ public class TreeManager : MonoBehaviour
     }
     void Start()
     {
+        tutorialManager = GameObject.Find("TutorialManager").GetComponent<TutorialManager>();
     }
     void OnDestroy()
     {
@@ -70,6 +71,7 @@ public class TreeManager : MonoBehaviour
         if (collision.gameObject.CompareTag("waterCollider"))
         {
             fireIndicatorTransform.gameObject.SetActive(false);
+            tutorialManager.waterBucketSubtask.UpdateProgress();
         }
     }
 }

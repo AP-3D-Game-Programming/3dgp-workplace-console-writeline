@@ -18,7 +18,7 @@ public class TutorialManager : MonoBehaviour
 
 	private List<SubtaskUI> moveSubtasks = new List<SubtaskUI>();
 	private List<SubtaskUI> axeSubtasks = new List<SubtaskUI>();
-	private List<SubtaskUI> waterBucketSubtasks = new List<SubtaskUI>();
+	public SubtaskUI waterBucketSubtask;
 	private List<SubtaskUI> sleepSubtasks = new List<SubtaskUI>();
 	void Start()
 	{
@@ -122,7 +122,7 @@ public class TutorialManager : MonoBehaviour
 				axeSubtasks.Add(taskListManager.AddSubtask("Equip your axe using 1, 2, 3 or 4"));
 				// HighlightTree(true);
 				axeSubtasks.Add(taskListManager.AddSubtask("Find a tree to chop"));
-				waterBucketSubtasks.Add(taskListManager.AddSubtask("Find a tree to extinguish"));
+				waterBucketSubtask = taskListManager.AddSubtaskWithProgress("Find a tree to extinguish 0/2");
 				
 				break;
 

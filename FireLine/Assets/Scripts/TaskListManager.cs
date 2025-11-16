@@ -41,9 +41,9 @@ public class TaskListManager : MonoBehaviour
 		{
 			string[] parts = taskText.Split('/');
 			string baseText = taskText.Substring(0, taskText.LastIndexOf(' '));
-			baseText = baseText.Substring(0, baseText.LastIndexOf(' '));
+			//! not needed: baseText = baseText.Substring(0, baseText.LastIndexOf(' '));
 
-			int current = int.Parse(parts[0].Split(' ').Last());
+			int current = int.Parse(parts[0].Substring(parts[0].Length-1));
 			int total = int.Parse(parts[1]);
 
 			subtaskUI.SetupWithProgress(baseText, current, total);
@@ -132,4 +132,10 @@ public class TaskListManager : MonoBehaviour
 		activeObjectives.Add(subtask);
 		return subtaskUI;
 	}
+	public SubtaskUI AddSubtaskWithProgress(string subtaskText)
+    {
+        var subtaskUI = AddSubtask(subtaskText);
+		ParseAndSetup(subtaskUI, subtaskText);
+		return subtaskUI;
+    }
 }
