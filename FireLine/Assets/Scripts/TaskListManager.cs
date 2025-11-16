@@ -44,8 +44,10 @@ public class TaskListManager : MonoBehaviour
 		if (taskText.Contains("/"))
 		{
 			string[] parts = taskText.Split('/');
-			string baseText = taskText.Substring(0, taskText.LastIndexOf(' '));
-			baseText = baseText.Substring(0, baseText.LastIndexOf(' '));
+
+			// Find where the numbers start
+			int lastSpaceBeforeNumbers = taskText.LastIndexOf(' ', taskText.LastIndexOf(' ') - 1);
+			string baseText = taskText.Substring(0, lastSpaceBeforeNumbers).Trim();
 
 			int current = int.Parse(parts[0].Split(' ').Last());
 			int total = int.Parse(parts[1]);
@@ -57,6 +59,7 @@ public class TaskListManager : MonoBehaviour
 			subtaskUI.Setup(taskText);
 		}
 	}
+
 
 	void Awake()
 	{

@@ -1,46 +1,100 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class MushroomSpawnManager : MonoBehaviour
 {
-	public GameObject[] mushroomPrefabs; // Assign different mushroom variants
-	public Transform player;
-	public int numberOfMushrooms = 12;
-	public Vector2 spawnAreaSize = new Vector2(50f, 50f); // Area around origin
+	[SerializeField] private GameObject[] mushroomPrefabs;
+	[SerializeField] private int numberOfMushrooms = 12;
+	[SerializeField] private float spawnRadius = 20f;
+	[SerializeField] private Transform spawnCenter;
+	[SerializeField] private float spawnHeight = 50f;
+	[SerializeField] private LayerMask groundLayer;
 
 	private List<GameObject> spawnedMushrooms = new List<GameObject>();
-	private Terrain terrain;
-	private TerrainData terrainData;
+	private int mushroomsCollected = 0;
+	private int mushroomsSpawned = 0;
 
-	void Start()
+	void OnEnable()
 	{
-		terrain = Terrain.activeTerrain;
-		terrainData = terrain.terrainData;
+		// Subscribe to mushroom collection events if needed
+	}
 
-		SpawnMushrooms();
+	void OnDisable()
+	{
+		// Unsubscribe from events if needed
 	}
 
 	public void SpawnMushrooms()
 	{
+		Debug.Log("SpawnMushrooms() called!");
+
+		if (mushroomPrefabs == null || mushroomPrefabs.Length == 0)
+		{
+			Debug.LogError("No mushroom prefabs assigned in Inspector!");
+			return;
+		}
+
+		ClearMushrooms();
+		mushroomsCollected = 0;
+		mushroomsSpawned = 0;
+
 		for (int i = 0; i < numberOfMushrooms; i++)
 		{
-			// Random position within spawn area
-			float randomX = Random.Range(-spawnAreaSize.x / 2, spawnAreaSize.x / 2);
-			float randomZ = Random.Range(-spawnAreaSize.y / 2, spawnAreaSize.y / 2);
+			Vector3 randomPos = GetRandomGroundPosition();
 
-			// Get terrain height at this position
-			Vector3 worldPos = terrain.transform.position + new Vector3(randomX, 0, randomZ);
-			float height = terrain.SampleHeight(worldPos);
-			Vector3 spawnPosition = new Vector3(worldPos.x, height, worldPos.z);
+			if (randomPos != Vector3.zero)
+			{
+				int randomIndex = Random.Range(0, mushroomPrefabs.Length);
+				Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
 
-			// Random mushroom type
-			int randomIndex = Random.Range(0, mushroomPrefabs.Length);
+				GameObject mushroom = Instantiate(mushroomPrefabs[randomIndex], randomPos, randomRotation);
+				spawnedMushrooms.Add(mushroom);
+				mushroomsSpawned++;
+			}
+		}
 
-			// Spawn with random rotation
-			Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
-			GameObject mushroom = Instantiate(mushroomPrefabs[randomIndex], spawnPosition, randomRotation);
+		Debug.Log($"Spawned {mushroomsSpawned} mushrooms");
+	}
 
-			spawnedMushrooms.Add(mushroom);
+	private Vector3 GetRandomGroundPosition()
+	{
+		int maxAttempts = 10;
+
+		for (int attempt = 0; attempt < maxAttempts; attempt++)
+		{
+			Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
+			randomOffset.y = 0;
+
+			Vector3 spawnPos = spawnCenter.position + randomOffset;
+			spawnPos.y = spawnCenter.position.y + spawnHeight;
+
+			RaycastHit hit;
+			if (Physics.Raycast(spawnPos, Vector3.down, out hit, spawnHeight * 2, groundLayer))
+			{
+				return hit.point;
+			}
+		}
+
+		Debug.LogWarning("Could not find valid ground position for mushroom");
+		return Vector3.zero;
+	}
+
+	public void ClearMushrooms()
+	{
+		foreach (GameObject mushroom in spawnedMushrooms)
+		{
+			if (mushroom != null)
+				Destroy(mushroom);
+		}
+		spawnedMushrooms.Clear();
+	}
+
+	void OnDrawGizmosSelected()
+	{
+		if (spawnCenter != null)
+		{
+			Gizmos.color = Color.red;
+			Gizmos.DrawWireSphere(spawnCenter.position, spawnRadius);
 		}
 	}
 }

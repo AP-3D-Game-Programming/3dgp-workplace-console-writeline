@@ -114,6 +114,22 @@ public class DayManager : MonoBehaviour
 			{
 				"Pick up 10 mushrooms 0/10"
 			});
+			SubtaskUI mushroomSubtask = taskListManager.GetLastAddedSubtask(0);
+			if (mushroomSubtask != null)
+			{
+				taskListManager.SetMushroomSubtask(mushroomSubtask);
+			}
+
+			// Spawn mushrooms
+			if (mushroomSpawner != null)
+			{
+				mushroomSpawner.SpawnMushrooms();
+				Debug.Log("Spawned mushrooms for Day 3.");
+			}
+			else
+			{
+				Debug.LogError("MushroomSpawnManager is not assigned!");
+			}
 		}
 		else
 		{
