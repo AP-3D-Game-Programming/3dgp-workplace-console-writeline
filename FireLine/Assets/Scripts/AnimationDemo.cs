@@ -52,9 +52,16 @@ namespace BLINK
         private float borderAvoidanceTimer = 0f;
         private float lastBorderAvoidanceTime = 0f;
         private bool isInCombat = false;
+        private Vector3 startPosition;
+
+        [Header("Dangerous Surface Detection")]
+        public GameObject dangerousSurface; // sleep hier je object in Inspector
+        public float groundCheckDistance = 2f; // afstand van raycast naar beneden
 
         void Start()
         {
+            startPosition = transform.position; // startpositie opslaan
+
             if (animator == null) animator = GetComponent<Animator>();
             targetRotation = transform.rotation;
 
@@ -70,6 +77,11 @@ namespace BLINK
 
         void Update()
         {
+            // --------------------------
+            // CHECK DANGEROUS SURFACE
+            // --------------------------
+            CheckDangerousSurface();
+
             bool playerVisible = IsPlayerVisible();
 
             if (borderAvoidanceTimer > 0f)
@@ -156,10 +168,44 @@ namespace BLINK
                 }
             }
 
-            // ADD THIS → keeps the bear locked to terrain height
             StickToGround();
         }
 
+        void CheckDangerousSurface()
+        {
+            if (dangerousSurface == null) return;
+
+            if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, groundCheckDistance))
+            {
+                if (hit.collider.gameObject == dangerousSurface)
+                {
+                    if (showDebugInfo)
+                        Debug.LogWarning($"<color=red>Bear touched dangerous surface '{hit.collider.name}'! Respawning...</color>");
+                    RespawnToStart();
+                }
+            }
+        }
+
+        void RespawnToStart()
+        {
+            transform.position = startPosition;
+            targetRotation = transform.rotation;
+
+            currentSpeed = 0f;
+            isInCombat = false;
+            isAvoidingBorder = false;
+
+            StopAllCoroutines();
+            ForceCompleteReset();
+            animator.SetBool("Idle", true);
+            currentAction = "Idle";
+
+            StartCoroutine(BehaviorLoop());
+        }
+
+        // -----------------------
+        // REST VAN JE ORIGINELE CODE
+        // -----------------------
         void CheckAndAvoidBorder()
         {
             if (movementBounds == null || currentSpeed <= 0f) return;
@@ -205,15 +251,6 @@ namespace BLINK
                         Debug.Log($"<color=orange>Border detected ahead! Distance: {closestDistance:F2}m. Turning {turnAngle}°</color>");
                 }
             }
-        }
-
-        bool IsPlayerVisible()
-        {
-            if (player == null) return false;
-            Vector3 dir = player.position - transform.position;
-            if (dir.magnitude > visionDistance) return false;
-            float angle = Vector3.Angle(transform.forward, dir);
-            return angle <= visionAngle * 0.5f;
         }
 
         void AvoidObstacles()
@@ -375,9 +412,6 @@ namespace BLINK
                 Debug.Log("<color=green>>>> EXITING COMBAT MODE <<<</color>");
         }
 
-        // ---------------------------
-        //      STICK TO GROUND FIX
-        // ---------------------------
         void StickToGround()
         {
             if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 5f))
@@ -413,6 +447,15 @@ namespace BLINK
                 Gizmos.color = isInCombat ? Color.red : Color.cyan;
                 Gizmos.DrawWireSphere(transform.position, attackRange);
             }
+        }
+
+        bool IsPlayerVisible()
+        {
+            if (player == null) return false;
+            Vector3 dir = player.position - transform.position;
+            if (dir.magnitude > visionDistance) return false;
+            float angle = Vector3.Angle(transform.forward, dir);
+            return angle <= visionAngle * 0.5f;
         }
     }
 }
