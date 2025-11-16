@@ -73,4 +73,5 @@ public class TimeManager : MonoBehaviour
 	{
 		return (1f - currentTimeInDay) * dayDurationInSeconds;
 	}
+
 }
