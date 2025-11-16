@@ -12,6 +12,7 @@ public class TreeManager : MonoBehaviour
     
     private int deadTimer;
     private TutorialManager tutorialManager;
+    private DayManager dayManager;
 
     public event Action<TreeManager> OnBurnedStateChange;
     
@@ -28,6 +29,7 @@ public class TreeManager : MonoBehaviour
     void Start()
     {
         tutorialManager = GameObject.Find("TutorialManager").GetComponent<TutorialManager>();
+        dayManager = GameObject.Find("MangerDayManager").GetComponent<DayManager>(); 
     }
     void OnDestroy()
     {
@@ -71,7 +73,8 @@ public class TreeManager : MonoBehaviour
         if (collision.gameObject.CompareTag("waterCollider"))
         {
             fireIndicatorTransform.gameObject.SetActive(false);
-            tutorialManager.waterBucketSubtask.UpdateProgress();
+            if (dayManager.GetCurrentDay() == 1)
+                tutorialManager.waterBucketSubtask.UpdateProgress();
         }
     }
 }
