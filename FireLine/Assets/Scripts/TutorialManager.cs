@@ -8,7 +8,6 @@ public class TutorialManager : MonoBehaviour
 {
 	public GameObject tutorialTree;
 	public GameObject bed;
-	private Outline tutorialTreeOutline;
 	private bool tutorialCompleted = false;
 
 	private int step = 0;
@@ -27,12 +26,6 @@ public class TutorialManager : MonoBehaviour
 		{
 			ShowStep(0);
 		}
-
-		if (tutorialTree != null)
-			tutorialTreeOutline = tutorialTree.GetComponent<Outline>();
-
-		if (tutorialTreeOutline != null)
-			tutorialTreeOutline.enabled = false;
 
 		Outline bedOutline = bed.GetComponent<Outline>();
 		if (bedOutline == null)
@@ -88,7 +81,7 @@ public class TutorialManager : MonoBehaviour
 				axeSubtasks[0].MarkComplete();
 			}
 
-			if (axeSubtasks.TrueForAll(st => st.IsComplete()))
+			if (axeSubtasks.TrueForAll(st => st.IsComplete()) && waterBucketSubtask.IsComplete())
 			{
 				taskListManager.ClearAllTasks();
 				ShowStep(2);
@@ -120,6 +113,7 @@ public class TutorialManager : MonoBehaviour
 			case 1:
 				taskListManager.AddObjective("Find a choppable tree", new List<string>());
 				axeSubtasks.Add(taskListManager.AddSubtask("Equip your axe using 1, 2, 3 or 4"));
+
 				// HighlightTree(true);
 				axeSubtasks.Add(taskListManager.AddSubtask("Find a tree to chop"));
 				waterBucketSubtask = taskListManager.AddSubtaskWithProgress("Find a tree to extinguish 0/2");
@@ -136,12 +130,6 @@ public class TutorialManager : MonoBehaviour
 	public void OnAxePickedUp()
 	{
 		ShowStep(1);
-	}
-
-	public void HighlightTree(bool highlight)
-	{
-		if (tutorialTreeOutline != null)
-			tutorialTreeOutline.enabled = highlight;
 	}
 
 	public void OnTreeChopped()

@@ -33,7 +33,7 @@ public class TreesManager : MonoBehaviour
         }
 
         InvokeRepeating("HandleTreeSpawning", 0.5f, 0.5f);
-        InvokeRepeating("BurnRandomTree", 2f, 25f);
+        InvokeRepeating("BurnRandomTree", 2f, 20f);
     }
 
     void OnApplicationQuit()

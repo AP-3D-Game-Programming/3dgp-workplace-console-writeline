@@ -23,7 +23,7 @@ public class TreeManager : MonoBehaviour
         
         Burned = false;
         amountSecOnFire = 0;
-        deadTimer = 30;
+        deadTimer = 25;
     }
     void Start()
     {

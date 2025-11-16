@@ -7,6 +7,8 @@ public class ChopManager : MonoBehaviour
 	[SerializeField] private Transform player;
 	public float rayDistance = 100f;
 
+	[SerializeField] private InventoryManager inventoryManager;
+
 	private float lastChopTime = 0f;
 	[SerializeField] private float chopCooldown = 1f; // 1 second cooldown
 
@@ -34,10 +36,18 @@ public class ChopManager : MonoBehaviour
 			if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
 			{
 				ChoppableTree tree = hit.collider.GetComponent<ChoppableTree>();
-				if (tree != null)
+				if (inventoryManager == null) return;
+
+				Tool currentTool = inventoryManager.GetCurrentTool();
+
+				if (currentTool != null && currentTool.toolName == "Axe")
 				{
-					tree.TakeChop();
+					if (tree != null)
+					{
+						tree.TakeChop();
+					}
 				}
+				
 			}
 		}
 	}

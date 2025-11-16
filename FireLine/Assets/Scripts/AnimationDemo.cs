@@ -414,14 +414,39 @@ namespace BLINK
 
         void StickToGround()
         {
-            if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 5f))
+            Ray ray = new Ray(transform.position + Vector3.up * 1f, Vector3.down);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 5f))
             {
-                transform.position = new Vector3(
-                    transform.position.x,
-                    hit.point.y,
-                    transform.position.z
-                );
+                
+                if (!CanStandOnSurface(hit))
+                {
+                    
+                    Vector3 pos = transform.position;
+                    pos.y -= 10f * Time.deltaTime;
+                    transform.position = pos;
+                    return;
+                }
+
+                
+                transform.position = hit.point;
+
+                
+                Quaternion slopeRotation = Quaternion.FromToRotation(transform.up, hit.normal);
+                transform.rotation = slopeRotation * transform.rotation;
             }
+        }
+
+        bool CanStandOnSurface(RaycastHit hit, float maxSlope = 45f)
+        {
+            // Bepaal de helling tov wereld-up
+            float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+
+            // Als helling steiler is dan maxSlope, dan mag de beer er niet op
+            if (slopeAngle > maxSlope)
+                return false;
+
+            return true;
         }
 
         void OnDrawGizmos()
