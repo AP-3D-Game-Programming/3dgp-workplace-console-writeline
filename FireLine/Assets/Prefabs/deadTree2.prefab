@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6759055787200995927}
   - component: {fileID: 2661569432841474876}
   - component: {fileID: 6017051903373538535}
+  - component: {fileID: 8039150130363961686}
   m_Layer: 0
   m_Name: deadTree2
   m_TagString: Untagged
@@ -102,6 +103,19 @@ CapsuleCollider:
   m_Height: 5
   m_Direction: 1
   m_Center: {x: 0, y: 2, z: -0.15}
+--- !u!114 &8039150130363961686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1215182899609276316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bcb3159f0a024e4e8cb5c0ab3884828, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChoppableTree
+  choppedTreePrefab: {fileID: 165925517741137440, guid: 4d69441cfe9587b48809e9a390fa342f, type: 3}
 --- !u!1 &2110101974054781677
 GameObject:
   m_ObjectHideFlags: 0

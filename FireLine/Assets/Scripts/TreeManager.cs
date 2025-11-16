@@ -8,8 +8,9 @@ public class TreeManager : MonoBehaviour
     public Transform fireIndicatorTransform;
     private int amountSecOnFire;
     public bool Burned;
-
+    
     private int deadTimer;
+
 
     public event Action<TreeManager> OnBurnedStateChange;
     
@@ -19,8 +20,8 @@ public class TreeManager : MonoBehaviour
         fireIndicator = fireIndicatorTransform.GetComponent<FireIndicator>();
         fireIndicator.OnFireStateChange += HandleFireChange;
         
-        amountSecOnFire = 0;
         Burned = false;
+        amountSecOnFire = 0;
         deadTimer = 2;
     }
     void Start()

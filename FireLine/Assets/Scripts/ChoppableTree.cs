@@ -9,7 +9,12 @@ public class ChoppableTree : MonoBehaviour
 	public GameObject choppedTreePrefab;
 	private int chopCount = 0;
 	private int chopsNeeded = 3;
+	private TreesManager treesManager;
 
+	void Start()
+    {
+        treesManager = GameObject.Find("Terrain").GetComponent<TreesManager>();
+    }
 	public void TakeChop()
 	{
 		chopCount++;
@@ -33,7 +38,9 @@ public class ChoppableTree : MonoBehaviour
 		// Spawn the chopped version
 		Vector3 spawnPos = transform.position;
 		spawnPos.y += 0.5f;
-		Instantiate(choppedTreePrefab, spawnPos, transform.rotation);
+		var choppedTree = Instantiate(choppedTreePrefab, spawnPos, transform.rotation);
+		int treeIndex = treesManager.trees.FindIndex(t => t.RealTree == gameObject);
+		treesManager.trees[treeIndex].RealTree = choppedTree;
 
 		// Increment total wood count
 		totalWoodChopped++;

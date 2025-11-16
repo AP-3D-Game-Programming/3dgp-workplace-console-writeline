@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 
 public class TreesManager : MonoBehaviour
@@ -10,8 +12,7 @@ public class TreesManager : MonoBehaviour
     public GameObject[] BurnedtreePrefabs;
     private TerrainData terrainData;
     private Terrain terrain;
-    private List<TreeModel> trees;
-
+    public List<TreeModel> trees;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -61,10 +62,10 @@ public class TreesManager : MonoBehaviour
 
             var isObjectOnFire = tree.RealTree.transform.Find("Fire Indicator")?.gameObject.active ?? false;
             var isObjectBurned = tree.RealTree.transform.GetComponent<TreeManager>()?.Burned ?? false;
+            var isObjectAChoppedTree = tree.RealTree.transform.CompareTag("ChoppedTree");
 
-            if (Vector3.Distance(player.transform.position, tree.RealWorldPos) > 10f && !isObjectOnFire && !isObjectBurned)
+            if (Vector3.Distance(player.transform.position, tree.RealWorldPos) > 10f && !isObjectOnFire && !isObjectBurned && !isObjectAChoppedTree)
             {
-                Debug.Log(isObjectBurned);
                 Destroy(tree.RealTree);
                 tree.RealTree = null;
             }
@@ -106,6 +107,7 @@ public class TreesManager : MonoBehaviour
             treeModel.RealTree = null;
 
             treeModel.RealTree = Instantiate(BurnedtreePrefabs[treeModel.TreeInstance.prototypeIndex], treeModel.RealWorldPos, treeModel.RealWorldRotation);
+            treeModel.RealTree.GetComponent<TreeManager>().Burned = true;
             treeModel.setRealTreeCorrectScale();
         }
     }
@@ -115,17 +117,19 @@ public class TreesManager : MonoBehaviour
         bool isObjectOnFire;
         bool isObjectBurned;
         bool isObjectATree;
+        bool  isObjectAChoppedTree;
         do {
             i = Random.Range(0, trees.Count);
 
             isObjectOnFire = trees[i].RealTree?.transform.Find("Fire Indicator")?.gameObject.active ?? false;
             isObjectBurned = trees[i].RealTree?.transform.GetComponent<TreeManager>()?.Burned ?? false;
             isObjectATree = trees[i].TreeInstance.prototypeIndex < 2;
+            isObjectAChoppedTree = trees[i].RealTree?.transform.CompareTag("ChoppedTree") ?? false;
         }
         // if RealTree does not exist = true (loop continue)
         // if Component Not found = true (loop continue)
         // if RealTree is Burned = true (loop continue)
-        while (isObjectOnFire ||  isObjectBurned || !isObjectATree );
+        while (isObjectOnFire ||  isObjectBurned || !isObjectATree || isObjectAChoppedTree );
 
         SpawnRealTree(trees[i]);
 
