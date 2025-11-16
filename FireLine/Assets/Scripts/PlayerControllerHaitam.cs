@@ -15,6 +15,10 @@ public class PlayerControllerHaitam : MonoBehaviour
     public Camera firstPersonCam;
     public Transform cameraHolder;
 
+    [Header("Dangerous Surface Detection")]
+    public GameObject dangerousSurface; // sleep je surface hier
+    public float groundCheckDistance = 2f;
+
     private Transform cameraTransform;
     private CharacterController controller;
     private Animator anim;
@@ -23,6 +27,7 @@ public class PlayerControllerHaitam : MonoBehaviour
     private float xRotation = 0f;
     private float yRotation = 0f;
     private bool isSprinting = false;
+    private Vector3 startPosition;
 
     void Start()
     {
@@ -30,9 +35,10 @@ public class PlayerControllerHaitam : MonoBehaviour
         anim = GetComponent<Animator>();
         Cursor.lockState = CursorLockMode.Locked;
 
-        
         firstPersonCam.enabled = true;
         cameraTransform = firstPersonCam.transform;
+
+        startPosition = transform.position; // startpositie opslaan
     }
 
     void Update()
@@ -40,6 +46,8 @@ public class PlayerControllerHaitam : MonoBehaviour
         HandleMouseLook();
         HandleMovement();
         HandleAnimations();
+
+        CheckDangerousSurface(); // check elke frame
     }
 
     void HandleMouseLook()
@@ -52,8 +60,6 @@ public class PlayerControllerHaitam : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         cameraHolder.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        
         transform.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 
@@ -100,6 +106,32 @@ public class PlayerControllerHaitam : MonoBehaviour
             float inputMagnitude = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).magnitude;
             anim.SetFloat("Speed", inputMagnitude, 0.1f, Time.deltaTime);
         }
+    }
+
+    // -------------------------
+    // CHECK DANGEROUS SURFACE
+    // -------------------------
+    void CheckDangerousSurface()
+    {
+        if (dangerousSurface == null) return;
+
+        if (Physics.Raycast(transform.position + Vector3.up * 1f, Vector3.down, out RaycastHit hit, groundCheckDistance))
+        {
+            if (hit.collider.gameObject == dangerousSurface)
+            {
+                Debug.LogWarning($"<color=red>Player touched dangerous surface '{hit.collider.name}'! Respawning...</color>");
+                RespawnToStart();
+            }
+        }
+    }
+
+    void RespawnToStart()
+    {
+        controller.enabled = false; // tijdelijk uitschakelen om teleport te forceren
+        transform.position = startPosition;
+        controller.enabled = true;
+
+        velocity = Vector3.zero; // stop val
     }
 }
 

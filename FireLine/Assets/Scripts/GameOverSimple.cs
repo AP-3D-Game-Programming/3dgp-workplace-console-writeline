@@ -26,13 +26,15 @@ public class GameOverSimple : MonoBehaviour
 
     public void RestartGame()
     {
-        
-        Time.timeScale = 1f;
+
+        Debug.Log("BUTTON WERKT!");
 
         
+        Time.timeScale = 1f;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

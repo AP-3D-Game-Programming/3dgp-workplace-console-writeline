@@ -52,9 +52,16 @@ namespace BLINK
         private float borderAvoidanceTimer = 0f;
         private float lastBorderAvoidanceTime = 0f;
         private bool isInCombat = false;
+        private Vector3 startPosition;
+
+        [Header("Dangerous Surface Detection")]
+        public GameObject dangerousSurface; // sleep hier je object in Inspector
+        public float groundCheckDistance = 2f; // afstand van raycast naar beneden
 
         void Start()
         {
+            startPosition = transform.position; // startpositie opslaan
+
             if (animator == null) animator = GetComponent<Animator>();
             targetRotation = transform.rotation;
 
@@ -70,6 +77,11 @@ namespace BLINK
 
         void Update()
         {
+            // --------------------------
+            // CHECK DANGEROUS SURFACE
+            // --------------------------
+            CheckDangerousSurface();
+
             bool playerVisible = IsPlayerVisible();
 
             if (borderAvoidanceTimer > 0f)
@@ -126,7 +138,6 @@ namespace BLINK
                     Debug.Log("<color=green>Turn complete! Resuming normal behavior.</color>");
             }
 
-            
             if (currentAction == "WalkForward")
                 animator.speed = walkAnimationSpeedMultiplier;
             else if (currentAction == "Run Forward")
@@ -134,7 +145,6 @@ namespace BLINK
             else
                 animator.speed = 1f;
 
-            
             if (showDebugInfo && Time.frameCount % 120 == 0)
             {
                 AnimatorClipInfo[] clipInfo = animator.GetCurrentAnimatorClipInfo(0);
@@ -142,7 +152,6 @@ namespace BLINK
                 Debug.Log($"<color=yellow>Action: {currentAction} | Clip: {clipName} | Speed: {currentSpeed:F2} | InCombat: {isInCombat}</color>");
             }
 
-            
             if (playerVisible && !isInCombat)
             {
                 float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -158,8 +167,45 @@ namespace BLINK
                     StartCoroutine(AttackPlayer());
                 }
             }
+
+            StickToGround();
         }
 
+        void CheckDangerousSurface()
+        {
+            if (dangerousSurface == null) return;
+
+            if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, groundCheckDistance))
+            {
+                if (hit.collider.gameObject == dangerousSurface)
+                {
+                    if (showDebugInfo)
+                        Debug.LogWarning($"<color=red>Bear touched dangerous surface '{hit.collider.name}'! Respawning...</color>");
+                    RespawnToStart();
+                }
+            }
+        }
+
+        void RespawnToStart()
+        {
+            transform.position = startPosition;
+            targetRotation = transform.rotation;
+
+            currentSpeed = 0f;
+            isInCombat = false;
+            isAvoidingBorder = false;
+
+            StopAllCoroutines();
+            ForceCompleteReset();
+            animator.SetBool("Idle", true);
+            currentAction = "Idle";
+
+            StartCoroutine(BehaviorLoop());
+        }
+
+        // -----------------------
+        // REST VAN JE ORIGINELE CODE
+        // -----------------------
         void CheckAndAvoidBorder()
         {
             if (movementBounds == null || currentSpeed <= 0f) return;
@@ -205,15 +251,6 @@ namespace BLINK
                         Debug.Log($"<color=orange>Border detected ahead! Distance: {closestDistance:F2}m. Turning {turnAngle}°</color>");
                 }
             }
-        }
-
-        bool IsPlayerVisible()
-        {
-            if (player == null) return false;
-            Vector3 dir = player.position - transform.position;
-            if (dir.magnitude > visionDistance) return false;
-            float angle = Vector3.Angle(transform.forward, dir);
-            return angle <= visionAngle * 0.5f;
         }
 
         void AvoidObstacles()
@@ -339,7 +376,6 @@ namespace BLINK
                     currentSpeed = 0f;
                     SetNewDirectionTowards(player.position);
 
-                    
                     ForceCompleteReset();
                     currentAction = "Attack1";
                     animator.SetBool("Attack1", true);
@@ -347,7 +383,7 @@ namespace BLINK
                     if (showDebugInfo)
                         Debug.Log("<color=red>>>> ATTACKING! <<<</color>");
 
-                    yield return new WaitForSeconds(0.1f); 
+                    yield return new WaitForSeconds(0.1f);
 
                     player.GetComponent<GameOverSimple>()?.TakeHit();
                     player.GetComponent<SimpleKnockBack>()?.ApplyKnockback(transform.position);
@@ -357,18 +393,14 @@ namespace BLINK
                 }
                 else
                 {
-                    
                     SetNewDirectionTowards(player.position);
-
                     currentAction = "Run Forward";
                     currentSpeed = runSpeed;
                     animator.SetBool("Run Forward", true);
-
                     yield return new WaitForSeconds(0.1f);
                 }
             }
 
-            
             isInCombat = false;
             currentSpeed = 0f;
 
@@ -378,6 +410,18 @@ namespace BLINK
 
             if (showDebugInfo)
                 Debug.Log("<color=green>>>> EXITING COMBAT MODE <<<</color>");
+        }
+
+        void StickToGround()
+        {
+            if (Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 5f))
+            {
+                transform.position = new Vector3(
+                    transform.position.x,
+                    hit.point.y,
+                    transform.position.z
+                );
+            }
         }
 
         void OnDrawGizmos()
@@ -403,6 +447,15 @@ namespace BLINK
                 Gizmos.color = isInCombat ? Color.red : Color.cyan;
                 Gizmos.DrawWireSphere(transform.position, attackRange);
             }
+        }
+
+        bool IsPlayerVisible()
+        {
+            if (player == null) return false;
+            Vector3 dir = player.position - transform.position;
+            if (dir.magnitude > visionDistance) return false;
+            float angle = Vector3.Angle(transform.forward, dir);
+            return angle <= visionAngle * 0.5f;
         }
     }
 }
