@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using NUnit.Framework;
-using TMPro;
+using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class TreesManager : MonoBehaviour
@@ -32,7 +33,7 @@ public class TreesManager : MonoBehaviour
         }
 
         InvokeRepeating("HandleTreeSpawning", 0.5f, 0.5f);
-        InvokeRepeating("BurnRandomTree", 0.5f, 0.5f);
+        InvokeRepeating("BurnRandomTree", 2f, 25f);
     }
 
     void OnApplicationQuit()
@@ -113,24 +114,26 @@ public class TreesManager : MonoBehaviour
     }
     private void BurnRandomTree()
     {
-        var i = -1;
-        bool isObjectOnFire;
-        bool isObjectBurned;
-        bool isObjectATree;
-        bool  isObjectAChoppedTree;
-        do {
-            i = Random.Range(0, trees.Count);
+        
+        var nearByTrees =  trees.Where(t =>
+        {
+            var isObjectNearBy = Vector3.Distance(player.transform.position, t.RealWorldPos) <= 100f;
+            var isObjectOnFire = t.RealTree?.transform.Find("Fire Indicator")?.gameObject.active ?? false;
+            var isObjectBurned = t.RealTree?.transform.GetComponent<TreeManager>()?.Burned ?? false;
+            var isObjectATree = t.TreeInstance.prototypeIndex < 2;
+            var isObjectAChoppedTree = t.RealTree?.transform.CompareTag("ChoppedTree") ?? false;
 
-            isObjectOnFire = trees[i].RealTree?.transform.Find("Fire Indicator")?.gameObject.active ?? false;
-            isObjectBurned = trees[i].RealTree?.transform.GetComponent<TreeManager>()?.Burned ?? false;
-            isObjectATree = trees[i].TreeInstance.prototypeIndex < 2;
-            isObjectAChoppedTree = trees[i].RealTree?.transform.CompareTag("ChoppedTree") ?? false;
-        }
-        // if RealTree does not exist = true (loop continue)
-        // if Component Not found = true (loop continue)
-        // if RealTree is Burned = true (loop continue)
-        while (isObjectOnFire ||  isObjectBurned || !isObjectATree || isObjectAChoppedTree );
+            if (isObjectNearBy && !isObjectOnFire &&  !isObjectBurned && isObjectATree && !isObjectAChoppedTree)
+                return true;
+            else return false;
+        }  
+            
+        ).ToList();
+        if (nearByTrees.Count == 0) return;
+        int i;
+        i = Random.Range(0, nearByTrees.Count);
 
+        i = trees.FindIndex(t => t == nearByTrees[i]);
         SpawnRealTree(trees[i]);
 
         Transform fireIndicator = trees[i].RealTree.transform.Find("Fire Indicator");

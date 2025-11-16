@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TreeManager : MonoBehaviour
@@ -22,7 +23,7 @@ public class TreeManager : MonoBehaviour
         
         Burned = false;
         amountSecOnFire = 0;
-        deadTimer = 2;
+        deadTimer = 30;
     }
     void Start()
     {
@@ -63,5 +64,12 @@ public class TreeManager : MonoBehaviour
         if (amountSecOnFire >= deadTimer)
             fireIndicator.gameObject.SetActive(false);
     }
-    
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("waterCollider"))
+        {
+            fireIndicatorTransform.gameObject.SetActive(false);
+        }
+    }
 }

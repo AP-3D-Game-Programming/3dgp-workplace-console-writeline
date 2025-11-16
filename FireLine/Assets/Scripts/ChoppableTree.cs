@@ -40,7 +40,8 @@ public class ChoppableTree : MonoBehaviour
 		spawnPos.y += 0.5f;
 		var choppedTree = Instantiate(choppedTreePrefab, spawnPos, transform.rotation);
 		int treeIndex = treesManager.trees.FindIndex(t => t.RealTree == gameObject);
-		treesManager.trees[treeIndex].RealTree = choppedTree;
+		if (treeIndex > -1)
+			treesManager.trees[treeIndex].RealTree = choppedTree;
 
 		// Increment total wood count
 		totalWoodChopped++;

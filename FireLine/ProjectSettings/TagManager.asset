@@ -9,6 +9,8 @@ TagManager:
   - smoke
   - Tree
   - Terrain
+  - ChoppedTree
+  - waterCollider
   layers:
   - Default
   - TransparentFX

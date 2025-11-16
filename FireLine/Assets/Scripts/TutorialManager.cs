@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,8 +18,8 @@ public class TutorialManager : MonoBehaviour
 
 	private List<SubtaskUI> moveSubtasks = new List<SubtaskUI>();
 	private List<SubtaskUI> axeSubtasks = new List<SubtaskUI>();
+	private List<SubtaskUI> waterBucketSubtasks = new List<SubtaskUI>();
 	private List<SubtaskUI> sleepSubtasks = new List<SubtaskUI>();
-
 	void Start()
 	{
 		// Only show tutorial on Day 1
@@ -119,8 +120,10 @@ public class TutorialManager : MonoBehaviour
 			case 1:
 				taskListManager.AddObjective("Find a choppable tree", new List<string>());
 				axeSubtasks.Add(taskListManager.AddSubtask("Equip your axe using 1, 2, 3 or 4"));
-				HighlightTree(true);
+				// HighlightTree(true);
 				axeSubtasks.Add(taskListManager.AddSubtask("Find a tree to chop"));
+				waterBucketSubtasks.Add(taskListManager.AddSubtask("Find a tree to extinguish"));
+				
 				break;
 
 			case 2:

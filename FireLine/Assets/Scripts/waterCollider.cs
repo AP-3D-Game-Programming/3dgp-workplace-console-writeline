@@ -8,7 +8,7 @@ public class waterCollider : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
-        rb.AddForce(Vector3.forward * 4f);
+        rb.AddForce(Vector3.forward * 6f);
     }
 
     // Update is called once per frame
@@ -19,13 +19,6 @@ public class waterCollider : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision != null)
-        {
-            if (collision.gameObject.CompareTag("Tree"))
-            {
-                collision.gameObject.transform.Find("Fire Indicator").gameObject.SetActive(false);
-            }
-        }
         Destroy(gameObject);
     }
 }
