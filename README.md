@@ -12,3 +12,5 @@ Jullie winnen als elke speler zijn taken heeft uitgevoerd en er niet meer dan 5 
 
 
 Jullie verliezen als er meer dan 5 branden op het zijn, of de beer niet verjaagd is binnen 3 rondes
+
+Final game link: https://haisam02.itch.io/fireline-v31
